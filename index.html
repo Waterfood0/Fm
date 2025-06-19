@@ -3,279 +3,289 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Современное Онлайн Радио</title>
+<title>Интернет Радио — Расширенное</title>
 <style>
-  /* Переменные цветов */
   :root {
-    --clr-dark-bg: #0a0f21;
-    --clr-dark-text: #b0c4ff;
-    --clr-dark-accent: #2f61ff;
-    --clr-dark-shadow: #1e2a5b;
-
-    --clr-light-bg: #f0f4ff;
-    --clr-light-text: #0a0f21;
-    --clr-light-accent: #4169e1;
-    --clr-light-shadow: #a1b3e5;
-
-    --radius: 14px;
-    --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --clr-dark-bg: #0a0a12;
+    --clr-dark-text: #00ff88;
+    --clr-dark-accent: #00cc66;
+    --clr-light-bg: #f5f8ff;
+    --clr-light-text: #003344;
+    --clr-light-accent: #005577;
+    --transition: 0.3s ease;
   }
-
-  /* Базовые стили */
+  /* Общие стили */
   body {
-    margin: 0; padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--clr-dark-bg);
+    margin: 0; min-height: 100vh;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--clr-dark-bg);
     color: var(--clr-dark-text);
-    display: flex;
-    justify-content: center;
+    display: flex; flex-direction: column;
     align-items: center;
-    height: 100vh;
-    overflow: hidden;
+    justify-content: flex-start;
+    padding: 20px;
+    transition: background var(--transition), color var(--transition);
     user-select: none;
-    transition: background-color var(--transition), color var(--transition);
   }
-
   body.light {
-    background-color: var(--clr-light-bg);
+    background: var(--clr-light-bg);
     color: var(--clr-light-text);
   }
-
-  /* Контейнер радио */
+  h1 {
+    font-weight: 900;
+    margin-bottom: 0.5em;
+    user-select: text;
+    text-align: center;
+    font-size: 2.2rem;
+  }
+  /* Радио контейнер */
   .radio {
-    background: var(--clr-dark-shadow);
-    border-radius: var(--radius);
-    width: 350px;
-    padding: 25px 30px 40px;
-    box-shadow:
-      0 8px 30px rgba(47,97,255,0.3),
-      inset 0 0 30px rgba(47,97,255,0.15);
+    background: #111;
+    border-radius: 15px;
+    box-shadow: 0 0 15px #00ff8877;
+    max-width: 480px;
+    width: 100%;
+    padding: 20px 25px;
+    display: flex; flex-direction: column;
+    gap: 20px;
     transition: background var(--transition), box-shadow var(--transition);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 25px;
   }
   body.light .radio {
-    background: var(--clr-light-shadow);
-    box-shadow:
-      0 8px 30px rgba(65,105,225,0.3),
-      inset 0 0 30px rgba(65,105,225,0.15);
+    background: #e8f0ff;
+    box-shadow: 0 0 15px #005577aa;
   }
-
-  /* Заголовок */
-  .radio h1 {
-    font-weight: 700;
-    font-size: 1.9rem;
-    margin: 0;
-    user-select: none;
-  }
-
-  /* Кнопка Вкл/Пауза */
+  /* Кнопка вкл/выкл радио */
   .btn-power {
-    width: 75px; height: 75px;
+    width: 60px; height: 60px;
     border-radius: 50%;
-    background: transparent;
-    border: 3.5px solid var(--clr-dark-accent);
-    box-shadow:
-      0 0 14px var(--clr-dark-accent),
-      inset 0 0 20px var(--clr-dark-accent);
+    border: none;
+    background: #222;
+    box-shadow: 0 0 8px #008855cc inset;
     cursor: pointer;
     position: relative;
-    transition:
-      background-color var(--transition),
-      border-color var(--transition),
-      box-shadow var(--transition);
-    outline: none;
+    transition: background var(--transition), box-shadow var(--transition);
   }
-  body.light .btn-power {
-    border-color: var(--clr-light-accent);
-    box-shadow:
-      0 0 14px var(--clr-light-accent),
-      inset 0 0 20px var(--clr-light-accent);
-  }
-
-  /* Иконка воспроизведения */
   .btn-power::before {
     content: '';
     position: absolute;
-    left: 28px;
-    top: 20px;
-    border-style: solid;
-    border-width: 18px 0 18px 28px;
-    border-color: transparent transparent transparent var(--clr-dark-accent);
-    transition: border-color var(--transition);
+    top: 12px; left: 27px;
+    width: 6px; height: 28px;
+    background: var(--clr-dark-accent);
+    border-radius: 3px;
+    transform-origin: center bottom;
+    transform: scaleY(1);
+    transition: transform 0.2s ease;
   }
-  body.light .btn-power::before {
-    border-color: transparent transparent transparent var(--clr-light-accent);
-  }
-
-  /* Когда включено */
   .btn-power.active {
-    background-color: var(--clr-dark-accent);
-    border-color: var(--clr-dark-accent);
-    box-shadow:
-      0 0 25px var(--clr-dark-accent),
-      inset 0 0 25px var(--clr-dark-accent);
-  }
-  body.light .btn-power.active {
-    background-color: var(--clr-light-accent);
-    border-color: var(--clr-light-accent);
-    box-shadow:
-      0 0 25px var(--clr-light-accent),
-      inset 0 0 25px var(--clr-light-accent);
+    background: #00cc66;
+    box-shadow: 0 0 15px #00ff88 inset;
   }
   .btn-power.active::before {
-    content: '';
-    width: 18px;
-    height: 28px;
-    background: var(--clr-dark-bg);
-    left: 28px;
-    top: 22px;
-    border: none;
-    clip-path: polygon(
-      0 0, 30% 0, 30% 100%, 0% 100%,
-      70% 0, 100% 0, 100% 100%, 70% 100%
-    );
+    transform: scaleY(0);
+  }
+  body.light .btn-power {
+    background: #ddeeff;
+    box-shadow: 0 0 10px #0088cc inset;
+  }
+  body.light .btn-power.active {
+    background: #0055aa;
+    box-shadow: 0 0 20px #3399ff inset;
   }
   body.light .btn-power.active::before {
-    background: var(--clr-light-bg);
+    background: #aad4ff;
   }
-
-  /* Список каналов */
-  .channels {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    user-select: none;
-    max-height: 260px;
-    overflow-y: auto;
-    padding-right: 8px;
-  }
-
-  /* Scrollbar */
-  .channels::-webkit-scrollbar {
-    width: 7px;
-  }
-  .channels::-webkit-scrollbar-track {
+  /* Кнопки переключения каналов */
+  .btn-switch {
     background: transparent;
+    border: none;
+    color: inherit;
+    font-size: 2.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    padding: 0 10px;
+    transition: color var(--transition);
+  }
+  .btn-switch:hover {
+    color: var(--clr-dark-accent);
+  }
+  body.light .btn-switch:hover {
+    color: var(--clr-light-accent);
+  }
+  /* Блок каналов */
+  .channels {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 180px;
+    overflow-y: auto;
+    border: 1px solid #00ff8844;
+    border-radius: 10px;
+    padding: 10px;
+    user-select: none;
+    background: #121212;
+  }
+  body.light .channels {
+    border-color: #00559988;
+    background: #e6f0ff;
+  }
+  .channel {
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background var(--transition), box-shadow var(--transition);
+    position: relative;
+  }
+  .channel.active {
+    background: var(--clr-dark-accent);
+    color: #001100;
+    font-weight: 700;
+    box-shadow: 0 0 10px var(--clr-dark-accent);
+  }
+  body.light .channel.active {
+    background: var(--clr-light-accent);
+    color: #f0f9ff;
+    box-shadow: 0 0 15px var(--clr-light-accent);
+  }
+  .channel-color {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 6px #0008 inset;
+  }
+  /* Текущий трек */
+  .track-info {
+    margin-top: 10px;
+    font-style: italic;
+    font-size: 1rem;
+    min-height: 24px;
+    user-select: text;
+  }
+  /* Меню настроек */
+  .settings-panel {
+    background: #111a;
+    backdrop-filter: blur(8px);
+    border-radius: 15px;
+    padding: 15px 20px;
+    max-width: 480px;
+    width: 100%;
+    display: none;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 0 0 12px #00ff88aa;
+  }
+  body.light .settings-panel {
+    background: #dce8ffcc;
+    box-shadow: 0 0 12px #3399ffaa;
+  }
+  .settings-panel.open {
+    display: flex;
+  }
+  .settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .settings-header h2 {
+    font-weight: 800;
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  .settings-close {
+    background: transparent;
+    border: none;
+    font-size: 1.8rem;
+    font-weight: 900;
+    cursor: pointer;
+    color: inherit;
+    transition: color var(--transition);
+  }
+  .settings-close:hover {
+    color: var(--clr-dark-accent);
+  }
+  body.light .settings-close:hover {
+    color: var(--clr-light-accent);
+  }
+  /* Ползунки и переключатели */
+  .setting-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  label {
+    font-weight: 600;
+    font-size: 1rem;
+    user-select: none;
+  }
+  input[type=range] {
+    width: 100%;
+    cursor: pointer;
+  }
+  input[type=checkbox] {
+    cursor: pointer;
+    width: 18px; height: 18px;
+  }
+  /* Тоггл темы */
+  .theme-toggle {
+    position: fixed;
+    top: 20px; right: 20px;
+    background: #222;
+    border: none;
+    border-radius: 12px;
+    color: var(--clr-dark-accent);
+    font-size: 1.6rem;
+    padding: 6px 12px;
+    cursor: pointer;
+    box-shadow: 0 0 8px #00ff88aa;
+    transition: background var(--transition), color var(--transition);
+    user-select: none;
+    z-index: 999;
+  }
+  body.light .theme-toggle {
+    background: #ddeeff;
+    color: var(--clr-light-accent);
+    box-shadow: 0 0 12px #3399ffaa;
+  }
+  .theme-toggle:hover {
+    background: var(--clr-dark-accent);
+    color: #001100;
+  }
+  body.light .theme-toggle:hover {
+    background: var(--clr-light-accent);
+    color: #f0f9ff;
+  }
+  /* Подсветка активной кнопки */
+  .btn-power.active,
+  .btn-switch:focus,
+  .channel.active {
+    outline: 2px solid var(--clr-dark-accent);
+    outline-offset: 3px;
+  }
+  body.light .btn-power.active,
+  body.light .btn-switch:focus,
+  body.light .channel.active {
+    outline-color: var(--clr-light-accent);
+  }
+  /* Анимация нажатия кнопок */
+  button:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+  /* Scrollbar для списка каналов */
+  .channels::-webkit-scrollbar {
+    width: 8px;
   }
   .channels::-webkit-scrollbar-thumb {
     background: var(--clr-dark-accent);
-    border-radius: 3px;
-    transition: background-color var(--transition);
+    border-radius: 10px;
   }
   body.light .channels::-webkit-scrollbar-thumb {
     background: var(--clr-light-accent);
   }
-
-  /* Отдельный канал */
-  .channel {
-    background: var(--clr-dark-bg);
-    padding: 15px 18px;
-    border-radius: var(--radius);
-    box-shadow:
-      0 4px 14px rgba(15, 31, 67, 0.3);
-    cursor: pointer;
-    transition:
-      box-shadow var(--transition),
-      background-color var(--transition),
-      transform var(--transition);
-    color: var(--clr-dark-text);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 600;
-    font-size: 1.1rem;
-    position: relative;
-    overflow: hidden;
-  }
-  body.light .channel {
-    background: #fff;
-    box-shadow:
-      0 4px 14px rgba(65, 105, 225, 0.15);
-    color: var(--clr-light-text);
-  }
-
-  .channel:hover {
-    box-shadow:
-      0 8px 20px var(--clr-dark-accent);
-    background: #1224ff22;
-    transform: translateY(-5px);
-  }
-  body.light .channel:hover {
-    box-shadow:
-      0 8px 20px var(--clr-light-accent);
-    background: #4169e133;
-  }
-
-  /* Активный канал */
-  .channel.active {
-    box-shadow:
-      0 0 35px var(--clr-dark-accent);
-    background: var(--clr-dark-accent);
-    color: #000;
-    font-weight: 700;
-    transform: translateY(-6px);
-  }
-  body.light .channel.active {
-    box-shadow:
-      0 0 35px var(--clr-light-accent);
-    background: var(--clr-light-accent);
-    color: #fff;
-  }
-
-  /* Цветной акцент слева */
-  .channel::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 8px;
-    height: 100%;
-    background: var(--clr-dark-accent);
-    border-radius: var(--radius) 0 0 var(--radius);
-    transition: background var(--transition);
-    z-index: 1;
-  }
-  body.light .channel::before {
-    background: var(--clr-light-accent);
-  }
-  .channel.active::before {
-    filter: brightness(1.4);
-  }
-
-  /* Цвет полосы для каждого канала */
-  .channel[data-color]::before {
-    background: attr(data-color color);
-  }
-
-  /* Кнопка переключения темы */
-  .theme-toggle {
-    position: fixed;
-    top: 16px;
-    left: 16px;
-    font-size: 1.5rem;
-    cursor: pointer;
-    user-select: none;
-    color: var(--clr-dark-accent);
-    transition: color var(--transition);
-    z-index: 100;
-  }
-  body.light .theme-toggle {
-    color: var(--clr-light-accent);
-  }
-
-  /* Плавное появление иконки */
-  .btn-power:focus, .channel:focus, .theme-toggle:focus {
-    outline: none;
-    box-shadow: 0 0 8px 3px var(--clr-dark-accent);
-  }
-  body.light .btn-power:focus, body.light .channel:focus, body.light .theme-toggle:focus {
-    box-shadow: 0 0 8px 3px var(--clr-light-accent);
-  }
-
 </style>
 </head>
 <body>
@@ -283,125 +293,356 @@
 <button class="theme-toggle" aria-label="Переключить тему">🌙</button>
 
 <div class="radio" role="region" aria-label="Интернет радио">
-  <h1>Радио Онлайн</h1>
-  <button class="btn-power" aria-pressed="false" aria-label="Включить радио"></button>
-  <div class="channels" tabindex="0" aria-label="Список радиоканалов">
-    <!-- Каналы вставятся здесь -->
+  <h1>Интернет Радио</h1>
+  <div style="display:flex; justify-content:center; align-items:center; gap:15px;">
+    <button class="btn-switch" aria-label="Предыдущий канал" title="Предыдущий канал">⏮️</button>
+    <button class="btn-power" aria-pressed="false" aria-label="Включить радио"></button>
+    <button class="btn-switch" aria-label="Следующий канал" title="Следующий канал">⏭️</button>
+  </div>
+  <div class="channels" tabindex="0" aria-label="Список радиоканалов" role="list">
+    <!-- Каналы вставятся сюда -->
+  </div>
+  <div class="track-info" aria-live="polite" aria-atomic="true"></div>
+</div>
+
+<div class="settings-panel" aria-label="Настройки радио" role="region">
+  <div class="settings-header">
+    <h2>Настройки</h2>
+    <button class="settings-close" aria-label="Закрыть настройки">&times;</button>
+  </div>
+  <div class="setting-group">
+    <label for="volumeRange">Громкость: <span id="volumeValue">50%</span></label>
+    <input type="range" id="volumeRange" min="0" max="100" step="1" value="50" />
+  </div>
+  <div class="setting-group">
+    <label for="btnSoundsToggle"><input type="checkbox" id="btnSoundsToggle" checked /> Звуки кнопок</label>
+  </div>
+  <div class="setting-group">
+    <label for="themeSelect">Тема:</label>
+    <select id="themeSelect" aria-label="Выбор темы">
+      <option value="dark">Тёмная</option>
+      <option value="light">Светлая</option>
+      <option value="auto">Авто (по времени)</option>
+    </select>
+  </div>
+  <div class="setting-group">
+    <label for="favoritesToggle"><input type="checkbox" id="favoritesToggle" /> Показывать только избранные каналы</label>
   </div>
 </div>
 
+<button class="btn-open-settings" aria-label="Открыть настройки" title="Настройки" 
+  style="position: fixed; bottom: 20px; right: 20px; background:#00cc66; border:none; 
+  padding: 12px 16px; border-radius: 12px; color:#001100; font-weight:700; cursor:pointer;
+  box-shadow: 0 0 12px #00ff88;">
+  ⚙️
+</button>
+
 <script>
+(() => {
   const channelsData = [
-    {name: 'Европа Плюс', stream: 'https://ep128.hostingradio.ru:8050/ep128_mp3', color: '#2f61ff'},
-    {name: 'Русское Радио', stream: 'https://air.rusradio.ru:8000/rusradio128', color: '#ff2f2f'},
-    {name: 'Авторадио', stream: 'https://air.autoradio.ru:8000/autoradio128', color: '#2fff87'},
-    {name: 'Дорожное Радио', stream: 'https://dorognoe.hostingradio.ru/dorognoe128.mp3', color: '#ffb32f'},
-    {name: 'Наше Радио', stream: 'https://nashe1.hostingradio.ru:8050/nashe128.mp3', color: '#ff61ff'},
-    {name: 'Love Radio', stream: 'https://lovenet.hostingradio.ru:8050/lovenet128.mp3', color: '#ff6a6a'}
+    {name: 'Европа Плюс', stream: 'https://ep128.hostingradio.ru:8050/ep128_mp3', color: '#2f61ff', id: 'europaplus'},
+    {name: 'Русское Радио', stream: 'https://online.rusradio.ru:8000/rusradio256.mp3', color: '#d91f1f', id: 'rusradio'},
+    {name: 'Авторадио', stream: 'https://online.avtoradio.ru/autoradio256.mp3', color: '#ff7700', id: 'avtoradio'},
+    {name: 'Дорожное Радио', stream: 'https://dorognoe.hostingradio.ru:8050/dorognoe128.mp3', color: '#239923', id: 'dorognoe'},
+    {name: 'Наше Радио', stream: 'https://nashe1.hostingradio.ru:8050/nashe128.mp3', color: '#dd5500', id: 'nashe'},
+    {name: 'Радио Дача', stream: 'https://radio-dacha.hostingradio.ru:8050/radio_dacha_128.mp3', color: '#55aa00', id: 'radiodacha'},
+    {name: 'Love Radio', stream: 'https://loveradio.hostingradio.ru:8050/loveradio128.mp3', color: '#ff4081', id: 'loveradio'},
+    {name: 'DFM', stream: 'https://dfm.hostingradio.ru:8050/dfm128.mp3', color: '#9922ff', id: 'dfm'},
+    {name: 'Юмор FM', stream: 'https://veseloeradio.hostingradio.ru:8050/veselo128.mp3', color: '#ffcc00', id: 'yumorfm'},
+    {name: 'Ретро FM', stream: 'https://retrofm.hostingradio.ru:8050/retro128.mp3', color: '#bb4400', id: 'retrofm'},
+    {name: 'Радио Шансон', stream: 'https://radioshanson.hostingradio.ru:8050/shanson128.mp3', color: '#772222', id: 'shanson'},
+    {name: 'Радио Монте-Карло', stream: 'https://montecarlo.hostingradio.ru:8050/montecarlo128.mp3', color: '#0066cc', id: 'montecarlo'},
+    {name: 'Вести FM', stream: 'https://radiovesti.hostingradio.ru:8050/vesti128.mp3', color: '#003366', id: 'vesti'},
+    {name: 'Радио Россия', stream: 'https://radiovesna.hostingradio.ru:8050/vesna128.mp3', color: '#0055aa', id: 'radiorossiya'},
+    {name: 'Радио ENERGY', stream: 'https://energyfm.hostingradio.ru:8050/energy128.mp3', color: '#ff3300', id: 'energy'},
+    {name: 'Comedy Radio', stream: 'https://comedy-radio.hostingradio.ru:8050/comedy128.mp3', color: '#007700', id: 'comedyradio'},
+    {name: 'Like FM', stream: 'https://likefm.hostingradio.ru:8050/like128.mp3', color: '#33aaff', id: 'likefm'}
   ];
 
-  const radioEl = document.querySelector('.radio');
-  const channelsEl = radioEl.querySelector('.channels');
-  const btnPower = radioEl.querySelector('.btn-power');
-  const themeToggle = document.querySelector('.theme-toggle');
-
+  let currentIndex = 0;
   let audio = new Audio();
+  audio.crossOrigin = "anonymous";
+  audio.preload = "none";
   let isPlaying = false;
-  let currentChannelIndex = 0;
 
-  // Рендерим каналы
+  const btnPower = document.querySelector('.btn-power');
+  const btnPrev = document.querySelectorAll('.btn-switch')[0];
+  const btnNext = document.querySelectorAll('.btn-switch')[1];
+  const channelsList = document.querySelector('.channels');
+  const trackInfo = document.querySelector('.track-info');
+  const settingsPanel = document.querySelector('.settings-panel');
+  const btnOpenSettings = document.querySelector('.btn-open-settings');
+  const btnCloseSettings = settingsPanel.querySelector('.settings-close');
+  const volumeRange = document.getElementById('volumeRange');
+  const volumeValue = document.getElementById('volumeValue');
+  const btnSoundsToggle = document.getElementById('btnSoundsToggle');
+  const themeSelect = document.getElementById('themeSelect');
+  const favoritesToggle = document.getElementById('favoritesToggle');
+  let buttonSound = null;
+
+  // Звуки кнопок
+  function loadButtonSound() {
+    buttonSound = new Audio();
+    buttonSound.src = "https://actions.google.com/sounds/v1/alarms/beep_short.ogg"; // тихий звук клика
+    buttonSound.volume = 0.15;
+  }
+  loadButtonSound();
+
+  function playButtonSound() {
+    if (btnSoundsToggle.checked && buttonSound) {
+      buttonSound.currentTime = 0;
+      buttonSound.play().catch(() => {});
+    }
+  }
+
+  // Заполнить список каналов
   function renderChannels() {
-    channelsEl.innerHTML = '';
-    channelsData.forEach((ch, i) => {
-      const chEl = document.createElement('div');
-      chEl.classList.add('channel');
-      chEl.textContent = ch.name;
-      chEl.setAttribute('tabindex', '0');
-      chEl.setAttribute('role', 'button');
-      chEl.setAttribute('aria-pressed', 'false');
-      chEl.setAttribute('data-color', ch.color);
-      chEl.style.setProperty('--color', ch.color);
-      if(i === currentChannelIndex) {
-        chEl.classList.add('active');
-        chEl.setAttribute('aria-pressed', 'true');
+    channelsList.innerHTML = '';
+    let filtered = channelsData;
+    if (favoritesToggle.checked) {
+      const favs = JSON.parse(localStorage.getItem('radioFavorites') || '[]');
+      filtered = channelsData.filter(ch => favs.includes(ch.id));
+      if(filtered.length === 0) {
+        channelsList.innerHTML = '<i>Нет избранных каналов. Отметьте каналы звёздочкой в списке.</i>';
+        return;
       }
-      chEl.addEventListener('click', () => {
-        if(currentChannelIndex !== i) {
-          switchChannel(i);
-          playSoundClick();
-        }
+    }
+    filtered.forEach((ch, i) => {
+      const div = document.createElement('div');
+      div.classList.add('channel');
+      if (i === currentIndex) div.classList.add('active');
+      div.setAttribute('role', 'listitem');
+      div.setAttribute('tabindex', 0);
+      div.dataset.index = i;
+      div.dataset.id = ch.id;
+
+      div.innerHTML = `
+        <div class="channel-color" style="background:${ch.color}"></div>
+        ${ch.name}
+        <button aria-label="Добавить в избранное" class="fav-btn" style="margin-left:auto; background:none; border:none; cursor:pointer; font-size:1.2rem;">
+          ★
+        </button>
+      `;
+
+      const favBtn = div.querySelector('.fav-btn');
+      updateFavStar(ch.id, favBtn);
+
+      favBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        toggleFavorite(ch.id, favBtn);
+        playButtonSound();
       });
-      chEl.addEventListener('keydown', e => {
+
+      div.addEventListener('click', () => {
+        playButtonSound();
+        playChannel(i);
+      });
+
+      div.addEventListener('keydown', e => {
         if(e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          chEl.click();
+          playButtonSound();
+          playChannel(i);
         }
       });
-      channelsEl.appendChild(chEl);
+
+      channelsList.appendChild(div);
     });
   }
 
-  // Включить/выключить радио
-  btnPower.addEventListener('click', () => {
-    if(isPlaying) {
-      stopRadio();
+  // Избранное
+  function toggleFavorite(id, btn) {
+    let favs = JSON.parse(localStorage.getItem('radioFavorites') || '[]');
+    if (favs.includes(id)) {
+      favs = favs.filter(x => x !== id);
     } else {
-      startRadio();
+      favs.push(id);
     }
-  });
-
-  // Запуск радио
-  function startRadio() {
-    audio.src = channelsData[currentChannelIndex].stream;
-    audio.crossOrigin = "anonymous";
-    audio.play().catch(() => {});
-    isPlaying = true;
-    btnPower.classList.add('active');
-    btnPower.setAttribute('aria-pressed', 'true');
-    btnPower.setAttribute('aria-label', 'Выключить радио');
-    playSoundClick();
+    localStorage.setItem('radioFavorites', JSON.stringify(favs));
+    updateFavStar(id, btn);
   }
 
-  // Остановка радио
+  function updateFavStar(id, btn) {
+    const favs = JSON.parse(localStorage.getItem('radioFavorites') || '[]');
+    if (favs.includes(id)) {
+      btn.textContent = '⭐';
+      btn.title = 'Убрать из избранного';
+    } else {
+      btn.textContent = '☆';
+      btn.title = 'Добавить в избранное';
+    }
+  }
+
+  // Воспроизвести канал
+  function playChannel(index) {
+    if(index < 0) index = channelsData.length - 1;
+    if(index >= channelsData.length) index = 0;
+    currentIndex = index;
+
+    // Если фильтр по избранным включен, нужно пересчитать индекс на полный массив
+    if (favoritesToggle.checked) {
+      const favs = JSON.parse(localStorage.getItem('radioFavorites') || '[]');
+      const filtered = channelsData.filter(ch => favs.includes(ch.id));
+      if(filtered.length === 0) return;
+      const ch = filtered[index];
+      if(!ch) return;
+      audio.src = ch.stream;
+      trackInfo.textContent = `Слушаете: ${ch.name}`;
+    } else {
+      const ch = channelsData[currentIndex];
+      audio.src = ch.stream;
+      trackInfo.textContent = `Слушаете: ${ch.name}`;
+    }
+
+    audio.volume = volumeRange.value / 100;
+    audio.play().catch(() => {});
+    isPlaying = true;
+    updateUI();
+  }
+
+  // Остановить радио
   function stopRadio() {
     audio.pause();
     isPlaying = false;
-    btnPower.classList.remove('active');
-    btnPower.setAttribute('aria-pressed', 'false');
-    btnPower.setAttribute('aria-label', 'Включить радио');
-    playSoundClick();
+    updateUI();
+    trackInfo.textContent = '';
   }
 
-  // Переключение каналов
-  function switchChannel(index) {
-    if(index < 0 || index >= channelsData.length) return;
-    currentChannelIndex = index;
-    renderChannels();
-    if(isPlaying) {
-      audio.src = channelsData[currentChannelIndex].stream;
-      audio.crossOrigin = "anonymous";
-      audio.play().catch(() => {});
+  // Обновить UI кнопок и списков
+  function updateUI() {
+    btnPower.classList.toggle('active', isPlaying);
+    btnPower.setAttribute('aria-pressed', isPlaying ? 'true' : 'false');
+    btnPower.setAttribute('aria-label', isPlaying ? 'Выключить радио' : 'Включить радио');
+
+    // Выделяем активный канал
+    [...channelsList.children].forEach((el, i) => {
+      el.classList.toggle('active', i === currentIndex);
+    });
+  }
+
+  // Кнопки переключения каналов
+  btnPrev.addEventListener('click', () => {
+    playButtonSound();
+    if (!isPlaying) return;
+    playChannel(currentIndex - 1);
+  });
+  btnNext.addEventListener('click', () => {
+    playButtonSound();
+    if (!isPlaying) return;
+    playChannel(currentIndex + 1);
+  });
+
+  // Вкл/выкл радио
+  btnPower.addEventListener('click', () => {
+    playButtonSound();
+    if (isPlaying) {
+      stopRadio();
+    } else {
+      playChannel(currentIndex);
+    }
+  });
+
+  // Обработка громкости
+  volumeRange.addEventListener('input', () => {
+    audio.volume = volumeRange.value / 100;
+    volumeValue.textContent = volumeRange.value + '%';
+  });
+
+  // Звуки кнопок
+  btnSoundsToggle.addEventListener('change', () => {
+    if(!btnSoundsToggle.checked){
+      buttonSound.pause();
+      buttonSound.currentTime = 0;
+    }
+  });
+
+  // Открыть и закрыть настройки
+  btnOpenSettings.addEventListener('click', () => {
+    playButtonSound();
+    settingsPanel.classList.add('open');
+  });
+  btnCloseSettings.addEventListener('click', () => {
+    playButtonSound();
+    settingsPanel.classList.remove('open');
+  });
+
+  // Переключение темы
+  function setTheme(theme) {
+    if (theme === 'dark') {
+      document.body.classList.remove('light');
+      themeSelect.value = 'dark';
+    } else if (theme === 'light') {
+      document.body.classList.add('light');
+      themeSelect.value = 'light';
+    } else {
+      // авто по времени
+      const hour = new Date().getHours();
+      if (hour >= 7 && hour < 19) {
+        document.body.classList.add('light');
+      } else {
+        document.body.classList.remove('light');
+      }
+      themeSelect.value = 'auto';
     }
   }
 
-  // Звук нажатия (легкий щелчок)
-  function playSoundClick() {
-    const audioClick = new Audio('https://actions.google.com/sounds/v1/buttons/button_click.ogg');
-    audioClick.volume = 0.1;
-    audioClick.play().catch(() => {});
-  }
-
-  // Переключатель темы
-  let isLight = false;
-  themeToggle.addEventListener('click', () => {
-    isLight = !isLight;
-    document.body.classList.toggle('light', isLight);
-    themeToggle.textContent = isLight ? '🌞' : '🌙';
-    playSoundClick();
+  themeSelect.addEventListener('change', () => {
+    localStorage.setItem('radioTheme', themeSelect.value);
+    setTheme(themeSelect.value);
   });
 
-  renderChannels();
-</script>
+  // Показывать только избранное
+  favoritesToggle.addEventListener('change', () => {
+    renderChannels();
+    // После фильтра сбросить текущий индекс
+    currentIndex = 0;
+  });
 
-</body>
-</html>
+  // Кнопка переключения темы сверху
+  const themeToggleBtn = document.querySelector('.theme-toggle');
+  themeToggleBtn.addEventListener('click', () => {
+    playButtonSound();
+    let cur = themeSelect.value;
+    if(cur === 'dark') setTheme('light');
+    else if(cur === 'light') setTheme('auto');
+    else setTheme('dark');
+    localStorage.setItem('radioTheme', themeSelect.value);
+  });
+
+  // Инициализация
+  function init() {
+    const savedTheme = localStorage.getItem('radioTheme') || 'auto';
+    setTheme(savedTheme);
+
+    // Восстановить громкость
+    const savedVol = localStorage.getItem('radioVolume');
+    if (savedVol !== null) {
+      volumeRange.value = savedVol;
+      volumeValue.textContent = savedVol + '%';
+      audio.volume = savedVol / 100;
+    }
+
+    // Восстановить звук кнопок
+    const savedBtnSounds = localStorage.getItem('radioBtnSounds');
+    if (savedBtnSounds !== null) {
+      btnSoundsToggle.checked = savedBtnSounds === 'true';
+    }
+
+    // Восстановить избранное
+    renderChannels();
+
+    // Восстановить показ избранных
+    const savedFavsOnly = localStorage.getItem('radioFavsOnly');
+    if(savedFavsOnly !== null){
+      favoritesToggle.checked = savedFavsOnly === 'true';
+    }
+
+    // Сохраняем изменения настроек в localStorage
+    volumeRange.addEventListener('change', () => {
+      localStorage.setItem('radioVolume', volumeRange.value);
+    });
+    btnSoundsToggle.addEventListener('change', () => {
+      localStorage.setItem('radioBtnSounds', btnSoundsToggle.checked);
+    });
+    favoritesToggle.addEventListener('change', () => {
+      localStorage.setItem('radioFavsOnly', favoritesToggle.checked
