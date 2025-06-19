@@ -97,8 +97,8 @@
   /* Каждая станция — почти весь экран с небольшим отступом снизу */
   .station {
     scroll-snap-align: start;
-    height: 95vh;
-    max-height: 900px;
+    height: 98vh;
+    max-height: 950px;
     margin: 0 auto 10px;
     padding: 2rem 1.5rem 5rem;
     background: rgba(0, 255, 231, 0.15);
@@ -229,7 +229,7 @@
 
     <div class="radio-container" id="radioContainer">
 
-      <div class="station" data-url="https://ep128.hostingradio.ru:8056/ep128">
+      <div class="station" data-url="https://icecast.eradioportal.com:8000/europaplus.aac">
         <h2>Europa Plus</h2>
         <div class="visualizer">
           <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
@@ -242,26 +242,26 @@
         </div>
       </div>
 
-      <div class="station" data-url="https://stream.dfmmusic.ru:8000/dfm_320">
+      <div class="station" data-url="">
         <h2>DFM</h2>
         <div class="visualizer">
           <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
         </div>
         <div class="controls">
-          <button class="btn playBtn">▶️</button>
+          <button class="btn playBtn" disabled style="opacity:0.5; cursor: not-allowed;">▶️</button>
           <button class="btn pauseBtn" style="display:none;">⏸️</button>
           <button class="btn likeBtn">❤️ 40k</button>
           <button class="btn commentBtn">💬</button>
         </div>
       </div>
 
-      <div class="station" data-url="https://radiodacha.hostingradio.ru:8000/radiodacha128.mp3">
+      <div class="station" data-url="">
         <h2>Радио Дача</h2>
         <div class="visualizer">
           <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
         </div>
         <div class="controls">
-          <button class="btn playBtn">▶️</button>
+          <button class="btn playBtn" disabled style="opacity:0.5; cursor: not-allowed;">▶️</button>
           <button class="btn pauseBtn" style="display:none;">⏸️</button>
           <button class="btn likeBtn">❤️ 10k</button>
           <button class="btn commentBtn">💬</button>
@@ -272,16 +272,14 @@
   </div>
 
 <script>
-  const playButtons = document.querySelectorAll('.playBtn');
+  const playButtons = document.querySelectorAll('.playBtn:not([disabled])');
   const pauseButtons = document.querySelectorAll('.pauseBtn');
   let currentAudio = null;
   let currentStation = null;
 
-  // Время блокировки листания (мс)
   const scrollLockTime = 650;
   let scrollLocked = false;
 
-  // Функция воспроизведения станции
   function playStation(stationDiv) {
     if (currentAudio) {
       currentAudio.pause();
@@ -291,15 +289,17 @@
       }
     }
     const url = stationDiv.dataset.url;
+    if (!url) return;
     currentAudio = new Audio(url);
     currentAudio.volume = 1;
-    currentAudio.play();
+    currentAudio.play().catch(() => {
+      alert('Не удалось воспроизвести поток. Попробуйте позже.');
+    });
     currentStation = stationDiv;
     stationDiv.querySelector('.playBtn').style.display = 'none';
     stationDiv.querySelector('.pauseBtn').style.display = 'inline-block';
   }
 
-  // Пауза станции
   function pauseStation(stationDiv) {
     if (currentAudio && currentStation === stationDiv) {
       currentAudio.pause();
@@ -321,7 +321,6 @@
     });
   });
 
-  // IntersectionObserver для автопаузы при листании
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (!entry.isIntersecting) {
@@ -339,7 +338,6 @@
     observer.observe(station);
   });
 
-  // Блокировка скролла для жесткого листания
   const radioContainer = document.getElementById('radioContainer');
 
   radioContainer.addEventListener('wheel', e => {
@@ -349,30 +347,22 @@
     }
     scrollLocked = true;
 
-    // Определяем направление листания
     const direction = e.deltaY > 0 ? 1 : -1;
 
-    // Текущая высота прокрутки
     const currentScroll = radioContainer.scrollTop;
-
-    // Высота одной панели (плюс margin)
     const panelHeight = radioContainer.querySelector('.station').offsetHeight + 10;
 
-    // Рассчитываем следующую позицию для скролла
     let targetScroll = currentScroll + direction * panelHeight;
 
-    // Ограничиваем скролл в рамках контента
     if (targetScroll < 0) targetScroll = 0;
     const maxScroll = radioContainer.scrollHeight - radioContainer.clientHeight;
     if (targetScroll > maxScroll) targetScroll = maxScroll;
 
-    // Скроллим плавно
     radioContainer.scrollTo({
       top: targetScroll,
       behavior: 'smooth',
     });
 
-    // Блокируем скролл на время анимации
     setTimeout(() => {
       scrollLocked = false;
     }, scrollLockTime);
@@ -380,7 +370,6 @@
     e.preventDefault();
   }, { passive: false });
 
-  // Бургер меню
   const burgerBtn = document.getElementById('burgerBtn');
   const sidebar = document.getElementById('sidebar');
   const sidebarClose = document.getElementById('sidebarClose');
@@ -393,7 +382,6 @@
     sidebar.classList.remove('active');
     sidebar.setAttribute('aria-hidden', 'true');
   });
-
 </script>
 </body>
 </html>
