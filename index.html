@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Мини радио</title>
+<style>
+  body { background: #111; color: #0f0; font-family: monospace; text-align: center; padding: 50px; }
+  button { font-size: 1.2rem; padding: 10px 20px; margin: 10px; cursor: pointer; background: #0f0; border: none; border-radius: 8px; }
+</style>
+</head>
+<body>
+
+<h1>Мини Радио</h1>
+<audio id="radioPlayer" controls></audio><br/>
+
+<button onclick="prev()">⏮️ Назад</button>
+<button onclick="togglePlay()">▶️/⏸️ Старт/Пауза</button>
+<button onclick="next()">⏭️ Вперёд</button>
+
+<script>
+const tracks = [
+  { name: "Радио Россия", url: "http://icecast.radio-t.com:8000/rr1" },
+  { name: "Ваша музыка", url: "http://stream.whatever.com/yourstream.mp3" },
+  // Добавляй свои ссылки на радио или mp3 поток
+];
+
+let currentIndex = 0;
+const player = document.getElementById('radioPlayer');
+
+function loadTrack(index) {
+  currentIndex = index;
+  player.src = tracks[currentIndex].url;
+  player.play();
+  document.title = "Радио: " + tracks[currentIndex].name;
+}
+
+function togglePlay() {
+  if (player.paused) {
+    player.play();
+  } else {
+    player.pause();
+  }
+}
+
+function next() {
+  currentIndex = (currentIndex + 1) % tracks.length;
+  loadTrack(currentIndex);
+}
+
+function prev() {
+  currentIndex = (currentIndex - 1 + tracks.length) % tracks.length;
+  loadTrack(currentIndex);
+}
+
+// Загрузка первого трека при старте
+loadTrack(currentIndex);
+</script>
+
+</body>
+</html>
