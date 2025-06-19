@@ -227,7 +227,8 @@
 
     <div id="sidebar" aria-hidden="true">
       <div id="sidebarClose" aria-label="Закрыть меню" title="Закрыть меню" role="button" tabindex="0">×</div>
-      <!-- Пока пусто -->
+      <h3 style="margin-bottom: 0.5rem;">Избранное</h3>
+      <ul id="favoritesList" style="list-style: none; padding: 0; color: #fff;"></ul>
     </div>
 
     <div class="radio-container" id="radioContainer">
@@ -240,8 +241,7 @@
         <div class="controls">
           <button class="btn playBtn">▶️</button>
           <button class="btn pauseBtn" style="display:none;">⏸️</button>
-          <button class="btn likeBtn">❤️ 53k</button>
-          <button class="btn commentBtn">💬</button>
+          <button class="btn favBtn">⭐ В избранное</button>
         </div>
       </div>
 
@@ -253,155 +253,56 @@
         <div class="controls">
           <button class="btn playBtn">▶️</button>
           <button class="btn pauseBtn" style="display:none;">⏸️</button>
-          <button class="btn likeBtn">❤️ 40k</button>
-          <button class="btn commentBtn">💬</button>
+          <button class="btn favBtn">⭐ В избранное</button>
         </div>
       </div>
-
-      <div class="station" data-url="https://icecast.radio.net/radio/radio-dacha-aac">
-        <h2>Радио Дача</h2>
-        <div class="visualizer">
-          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        </div>
-        <div class="controls">
-          <button class="btn playBtn">▶️</button>
-          <button class="btn pauseBtn" style="display:none;">⏸️</button>
-          <button class="btn likeBtn">❤️ 10k</button>
-          <button class="btn commentBtn">💬</button>
-        </div>
-      </div>
-
     </div>
   </div>
 
 <script>
-  const playButtons = document.querySelectorAll('.playBtn');
-  const pauseButtons = document.querySelectorAll('.pauseBtn');
-  let currentAudio = null;
-  let currentStation = null;
-
-  const scrollLockTime = 650;
-  let scrollLocked = false;
-
-  function playStation(stationDiv) {
-    const url = stationDiv.dataset.url;
-    if (!url) return alert('Поток для этой станции не задан');
-
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio = null;
-      if (currentStation) {
-        currentStation.querySelector('.pauseBtn').style.display = 'none';
-        currentStation.querySelector('.playBtn').style.display = 'inline-block';
-      }
-    }
-
-    currentAudio = new Audio(url);
-    currentAudio.volume = 1;
-    currentAudio.play().catch(() => {
-      alert('Не удалось воспроизвести поток. Попробуйте позже.');
-    });
-
-    currentStation = stationDiv;
-    stationDiv.querySelector('.playBtn').style.display = 'none';
-    stationDiv.querySelector('.pauseBtn').style.display = 'inline-block';
-  }
-
-  function pauseStation(stationDiv) {
-    if (currentAudio && currentStation === stationDiv) {
-      currentAudio.pause();
-      currentAudio = null;
-      stationDiv.querySelector('.pauseBtn').style.display = 'none';
-      stationDiv.querySelector('.playBtn').style.display = 'inline-block';
-    }
-  }
-
-  playButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const station = btn.closest('.station');
-      playStation(station);
-    });
-  });
-  pauseButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const station = btn.closest('.station');
-      pauseStation(station);
-    });
-  });
-
-  // При уходе со станции — останавливаем радио
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) {
-        const stationDiv = entry.target;
-        if (stationDiv === currentStation && currentAudio) {
-          pauseStation(stationDiv);
-        }
-      }
-    });
-  }, {threshold: 0.7});
-
-  document.querySelectorAll('.station').forEach(station => {
-    observer.observe(station);
-  });
-
-  // Скролл по одному элементу как в TikTok
-  const radioContainer = document.getElementById('radioContainer');
-
-  radioContainer.addEventListener('wheel', e => {
-    if (scrollLocked) {
-      e.preventDefault();
-      return;
-    }
-    scrollLocked = true;
-
-    const direction = e.deltaY > 0 ? 1 : -1;
-    const panelHeight = radioContainer.querySelector('.station').offsetHeight + 12;
-    const currentScroll = radioContainer.scrollTop;
-    let targetScroll = currentScroll + direction * panelHeight;
-
-    if (targetScroll < 0) targetScroll = 0;
-    const maxScroll = radioContainer.scrollHeight - radioContainer.clientHeight;
-    if (targetScroll > maxScroll) targetScroll = maxScroll;
-
-    radioContainer.scrollTo({
-      top: targetScroll,
-      behavior: 'smooth',
-    });
-
-    setTimeout(() => {
-      scrollLocked = false;
-    }, scrollLockTime);
-
-    e.preventDefault();
-  }, { passive: false });
-
-  // Бургер меню
+  // Управление бургер-меню
   const burgerBtn = document.getElementById('burgerBtn');
   const sidebar = document.getElementById('sidebar');
   const sidebarClose = document.getElementById('sidebarClose');
 
   burgerBtn.addEventListener('click', () => {
-    sidebar.classList.add('active');
-    sidebar.setAttribute('aria-hidden', 'false');
+    sidebar.classList.toggle('active');
+    sidebar.setAttribute('aria-hidden', !sidebar.classList.contains('active'));
   });
+
   sidebarClose.addEventListener('click', () => {
     sidebar.classList.remove('active');
     sidebar.setAttribute('aria-hidden', 'true');
   });
 
-  // Доступность кнопок Enter для меню
-  burgerBtn.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      burgerBtn.click();
-    }
-  });
-  sidebarClose.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      sidebarClose.click();
-    }
+  // Управление добавлением в избранное
+  const favoriteStations = new Map();
+
+  document.querySelectorAll('.favBtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const stationDiv = btn.closest('.station');
+      const title = stationDiv.querySelector('h2').innerText;
+      const favoritesList = document.getElementById('favoritesList');
+
+      if (favoriteStations.has(title)) {
+        favoriteStations.delete(title);
+        btn.innerText = '⭐ В избранное';
+        [...favoritesList.children].forEach(li => {
+          if (li.innerText === title) li.remove();
+        });
+      } else {
+        favoriteStations.set(title, stationDiv);
+        btn.innerText = '❌ Удалить из избранного';
+
+        const listItem = document.createElement('li');
+        listItem.innerText = title;
+        listItem.addEventListener('click', () => {
+          stationDiv.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        favoritesList.appendChild(listItem);
+      }
+    });
   });
 </script>
 </body>
