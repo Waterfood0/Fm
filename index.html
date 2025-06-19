@@ -59,8 +59,10 @@
     right: -300px;
     width: 300px;
     height: calc(100vh - var(--header-height));
-    background: rgba(0, 0, 0, 0.85);
-    box-shadow: -5px 0 15px rgba(0, 255, 231, 0.5);
+    background: rgba(0, 255, 231, 0.15);
+    box-shadow: 0 0 40px #00ffe7cc;
+    backdrop-filter: blur(20px);
+    border-left: 2px solid var(--accent);
     transition: right 0.3s ease;
     z-index: 100;
     padding: 1rem;
@@ -177,7 +179,7 @@
     </div>
 
     <div class="radio-container" id="radioContainer">
-      <div class="station" data-url="http://air.tvk6.ru/bfm256/tracks-a1/mono.m3u8">
+      <div class="station" data-url="http://109.239.133.141:8000/krasnoyarsk-48.aac">
         <h2>Europa Plus</h2>
         <div class="visualizer">
           <div class="bar"></div>
@@ -191,7 +193,21 @@
           <button class="btn pauseBtn" style="display:none;">⏸️ Pause</button>
         </div>
       </div>
-      <!-- Можно добавить еще станции здесь -->
+
+      <div class="station" data-url="http://online-1.gkvr.ru:8000/novoe_kra_64onair.aac">
+        <h2>Новое Радио</h2>
+        <div class="visualizer">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+        <div class="controls">
+          <button class="btn playBtn">▶️ Play</button>
+          <button class="btn pauseBtn" style="display:none;">⏸️ Pause</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -244,42 +260,31 @@
     });
   });
 
-  // Остановить аудио при листании
-  let isScrolling;
+  // Скролл по одной станции с snap
   radioContainer.addEventListener('scroll', () => {
-    window.clearTimeout(isScrolling);
-    isScrolling = setTimeout(() => {
-      if(currentAudio){
-        currentAudio.pause();
-        currentAudio = null;
-      }
+    if(currentAudio && currentStation){
+      // Проверяем какая станция сейчас в зоне видимости
+      const containerRect = radioContainer.getBoundingClientRect();
       stations.forEach(station => {
-        station.querySelector('.playBtn').style.display = 'inline-block';
-        station.querySelector('.pauseBtn').style.display = 'none';
-      });
-    }, 100);
-  });
-
-  // Жёсткий скролл по одному блоку (как в TikTok)
-  radioContainer.addEventListener('wheel', e => {
-    e.preventDefault();
-    const delta = Math.sign(e.deltaY);
-    const currentScroll = radioContainer.scrollTop;
-    const viewportHeight = window.innerHeight - parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height'));
-    if(delta > 0){
-      // вниз
-      radioContainer.scrollTo({
-        top: Math.min(currentScroll + viewportHeight - 70, radioContainer.scrollHeight),
-        behavior: 'smooth'
-      });
-    } else if(delta < 0){
-      // вверх
-      radioContainer.scrollTo({
-        top: Math.max(currentScroll - viewportHeight + 70, 0),
-        behavior: 'smooth'
+        const rect = station.getBoundingClientRect();
+        // Если станция не в центре видимой области, выключаем аудио
+        if(station !== currentStation && !(rect.top >= containerRect.top && rect.bottom <= containerRect.bottom)){
+          // выключаем плеер у текущей станции
+          if(currentStation){
+            const playBtn = currentStation.querySelector('.playBtn');
+            const pauseBtn = currentStation.querySelector('.pauseBtn');
+            if(currentAudio){
+              currentAudio.pause();
+              currentAudio = null;
+            }
+            playBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'none';
+            currentStation = null;
+          }
+        }
       });
     }
-  }, { passive: false });
+  });
 </script>
 </body>
 </html>
