@@ -31,7 +31,7 @@
       position: relative;
     }
     header {
-      padding: 1rem;
+      padding: 1rem 3rem 1rem 1rem;
       text-align: center;
       font-size: 1.5rem;
       background: linear-gradient(90deg, #00ffe7, #007f7f);
@@ -39,8 +39,71 @@
       font-weight: bold;
       box-shadow: 0 2px 10px #00ffe7aa;
       user-select: none;
-      z-index: 10;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+    /* Кнопка бургер */
+    .burger {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 22px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 20;
+    }
+    .burger div {
+      height: 3.5px;
+      background: #000;
+      border-radius: 2px;
+      transition: 0.3s;
+    }
+    /* Панель боковая */
+    .side-panel {
+      position: fixed;
+      top: 0;
+      right: -320px; /* скрыта за экраном */
+      width: 320px;
+      height: 100vh;
+      background: rgba(0, 255, 231, 0.15);
+      backdrop-filter: blur(15px);
+      box-shadow: -4px 0 20px rgba(0,255,231,0.5);
+      padding: 1.5rem;
+      transition: right 0.4s ease;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+    }
+    .side-panel.open {
+      right: 0;
+    }
+    /* Крестик закрытия */
+    .close-btn {
+      align-self: flex-end;
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--bg-dark);
+      background: var(--accent);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      text-align: center;
+      line-height: 32px;
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--accent);
+      user-select: none;
+      transition: background 0.3s ease;
+    }
+    .close-btn:hover {
+      background: #00bfb7;
+    }
+
     .radio-container {
       flex: 1;
       overflow-y: scroll;
@@ -56,12 +119,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
       position: relative;
       background: rgba(0, 255, 231, 0.07);
       backdrop-filter: blur(12px);
       margin: 0;
-      padding: 2rem 1.5rem;
+      padding: 2rem 1.5rem 5rem; /* добавлен большой паддинг снизу для кнопок */
       box-shadow:
         inset 0 -2px 2px -2px rgba(0, 255, 231, 0.15),
         inset 0 2px 2px -2px rgba(0, 255, 231, 0.15);
@@ -75,14 +137,17 @@
         inset 0 4px 4px -2px #00ffe766;
       cursor: pointer;
     }
+    /* Название сверху */
     .station h2 {
       font-size: 2.5rem;
       margin-bottom: 1.5rem;
       text-shadow: 0 0 8px #00ffe7aa;
       user-select: text;
+      align-self: center;
+      z-index: 5;
     }
 
-    /* Визуализация аудио — по центру */
+    /* Визуализация по центру */
     .visualizer {
       position: absolute;
       top: 50%;
@@ -96,6 +161,7 @@
       gap: 6px;
       pointer-events: none;
       user-select: none;
+      z-index: 1;
     }
     .bar {
       width: 8px;
@@ -113,18 +179,19 @@
       50% { height: 100px; }
     }
 
-    /* Кнопки управления — внизу */
+    /* Кнопки управления внизу */
     .controls {
       width: 100%;
       max-width: 400px;
       position: absolute;
-      bottom: 40px;
+      bottom: 25px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       justify-content: center;
       gap: 15px;
       user-select: none;
+      z-index: 10;
     }
     .btn {
       padding: 0.7rem 1.2rem;
@@ -190,7 +257,20 @@
 </head>
 <body>
   <div class="app">
-    <header>NeonRadio 🎧</header>
+    <header>
+      NeonRadio 🎧
+      <div class="burger" id="burgerBtn" aria-label="Открыть меню" role="button" tabindex="0">
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+    </header>
+
+    <div class="side-panel" id="sidePanel" aria-hidden="true">
+      <div class="close-btn" id="closeBtn" aria-label="Закрыть меню" role="button" tabindex="0">&times;</div>
+      <!-- Здесь пока пусто -->
+    </div>
+
     <div class="radio-container" id="radioContainer">
       <div class="station" data-url="https://europaplus.hostingradio.ru/ep128.mp3">
         <h2>Europa Plus</h2>
@@ -252,6 +332,29 @@
         };
       });
     });
+
+    // Бургер меню
+    const burgerBtn = document.getElementById('burgerBtn');
+    const sidePanel = document.getElementById('sidePanel');
+    const closeBtn = document.getElementById('closeBtn');
+
+    burgerBtn.addEventListener('click', () => {
+      sidePanel.classList.add('open');
+      sidePanel.setAttribute('aria-hidden', 'false');
+    });
+    closeBtn.addEventListener('click', () => {
+      sidePanel.classList.remove('open');
+      sidePanel.setAttribute('aria-hidden', 'true');
+    });
+
+    // Для удобства закрыть по Escape
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape' && sidePanel.classList.contains('open')) {
+        sidePanel.classList.remove('open');
+        sidePanel.setAttribute('aria-hidden', 'true');
+      }
+    });
   </script>
 </body>
-</html>
+  </html>
+  
