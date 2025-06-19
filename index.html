@@ -2,158 +2,277 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Радио Онлайн</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>NeonRadio — Радио нового поколения</title>
   <style>
+    :root {
+      --bg-dark: #0a0a0f;
+      --bg-light: #ffffff;
+      --accent: #00ffe7;
+      --font-main: 'Segoe UI', sans-serif;
+    }
     * {
       margin: 0; padding: 0; box-sizing: border-box;
     }
-    html, body {
-      height: 100%;
-      background: linear-gradient(to bottom, #000000, #002244);
-      font-family: Arial, sans-serif;
+    body {
+      background-color: var(--bg-dark);
+      color: var(--accent);
+      font-family: var(--font-main);
       overflow: hidden;
-      color: #fff;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .app {
+      height: 100vh;
+      width: 100vw;
+      max-width: 480px; /* ограничение для больших экранов */
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 0 40px var(--accent);
+      background: rgba(10,10,15,0.95);
+      border-radius: 15px;
+      overflow: hidden;
+    }
+    header {
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.8rem;
+      background: linear-gradient(90deg, #00ffe7, #007f7f);
+      color: #000;
+      font-weight: bold;
+      box-shadow: 0 2px 10px #00ffe7aa;
+      user-select: none;
+    }
+    .radio-container {
+      flex: 1;
+      overflow-y: auto;
+      scroll-snap-type: y mandatory;
+      -webkit-overflow-scrolling: touch;
     }
     .station {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      scroll-snap-align: start;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: rgba(0, 255, 231, 0.1);
+      backdrop-filter: blur(12px);
+      border: 2px solid #00ffe744;
+      margin: 2px 0;
+      transition: background-color 0.4s ease;
+      padding: 1rem;
+    }
+    .station:hover {
+      background: rgba(0, 255, 231, 0.15);
+      border-color: #00ffe7;
+      box-shadow: 0 0 15px #00ffe7cc;
+    }
+    .station h2 {
+      font-size: 2.4rem;
+      margin-bottom: 1.2rem;
+      text-shadow: 0 0 5px #00ffe7cc;
+      user-select: none;
+    }
+    .controls {
+      display: flex;
+      gap: 18px;
+    }
+    .btn {
+      padding: 0.7rem 1.2rem;
+      border: 2px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.25s, color 0.25s;
+      user-select: none;
+      box-shadow: 0 0 10px var(--accent);
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-direction: column;
-      transition: transform 0.6s ease;
+      min-width: 75px;
     }
-    .station.hidden {
-      transform: translateY(100%);
+    .btn:hover, .btn:focus {
+      background: var(--accent);
+      color: var(--bg-dark);
+      outline: none;
+      box-shadow: 0 0 18px var(--accent);
     }
-    .station.active {
-      transform: translateY(0);
+    .visualizer {
+      width: 100%;
+      max-width: 320px;
+      height: 140px;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
     }
-    .station.inactive {
-      transform: translateY(-100%);
+    .bar {
+      width: 10px;
+      background: var(--accent);
+      border-radius: 5px;
+      animation: beat 1s infinite ease-in-out;
     }
-    .logo {
-      width: 160px;
-      height: auto;
-      margin-bottom: 20px;
+    .bar:nth-child(2) { animation-delay: 0.15s; }
+    .bar:nth-child(3) { animation-delay: 0.3s; }
+    .bar:nth-child(4) { animation-delay: 0.45s; }
+    .bar:nth-child(5) { animation-delay: 0.6s; }
+
+    @keyframes beat {
+      0%, 100% { height: 30px; }
+      50% { height: 120px; }
     }
-    .name {
-      font-size: 2rem;
-      margin-bottom: 10px;
+
+    /* Scrollbar для контейнера */
+    .radio-container::-webkit-scrollbar {
+      width: 8px;
     }
-    .controls {
-      margin-top: 20px;
+    .radio-container::-webkit-scrollbar-track {
+      background: transparent;
     }
-    .controls button {
-      background: #004477;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      margin: 0 10px;
-      border-radius: 10px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s ease;
+    .radio-container::-webkit-scrollbar-thumb {
+      background-color: var(--accent);
+      border-radius: 20px;
     }
-    .controls button:hover {
-      background: #0066aa;
-    }
-    #voice-status {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.4);
-      padding: 6px 12px;
-      border-radius: 10px;
-      font-size: 0.9rem;
+
+    /* Адаптивность */
+    @media (max-width: 480px) {
+      header {
+        font-size: 1.5rem;
+        padding: 0.8rem;
+      }
+      .station h2 {
+        font-size: 2rem;
+      }
+      .btn {
+        font-size: 1rem;
+        min-width: 60px;
+        padding: 0.6rem 1rem;
+      }
+      .visualizer {
+        max-width: 280px;
+        height: 110px;
+      }
+      .bar {
+        width: 7px;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="voice-status">🎙️ Голос: включен</div>
-
-  <div id="stations"></div>
+  <div class="app" role="main" aria-label="Радио приложение NeonRadio">
+    <header>NeonRadio 🎧</header>
+    <div class="radio-container" id="radioContainer" tabindex="0" aria-live="polite">
+      <div class="station" data-url="https://europaplus.hostingradio.ru:8000/europaplus128.mp3" tabindex="0" aria-label="Станция Европа Плюс">
+        <h2>Europa Plus</h2>
+        <div class="visualizer" aria-hidden="true">
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+        <div class="controls">
+          <button class="btn playBtn" aria-pressed="false" aria-label="Воспроизвести или остановить Европа Плюс">▶️</button>
+          <button class="btn likeBtn" aria-label="Лайк Европа Плюс">❤️ 53k</button>
+          <button class="btn commentBtn" aria-label="Комментарии к Европа Плюс">💬</button>
+        </div>
+      </div>
+      <div class="station" data-url="https://loveshadow.hostingradio.ru:8000/love128.mp3" tabindex="0" aria-label="Станция Love Radio">
+        <h2>Love Radio</h2>
+        <div class="visualizer" aria-hidden="true">
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+        <div class="controls">
+          <button class="btn playBtn" aria-pressed="false" aria-label="Воспроизвести или остановить Love Radio">▶️</button>
+          <button class="btn likeBtn" aria-label="Лайк Love Radio">❤️ 89k</button>
+          <button class="btn commentBtn" aria-label="Комментарии к Love Radio">💬</button>
+        </div>
+      </div>
+      <!-- Добавляй станции здесь -->
+    </div>
+  </div>
 
   <script>
-    const stations = [
-      {
-        name: 'Европа Плюс',
-        stream: 'https://ep256.hostingradio.ru:8052/europaplus256.mp3',
-        logo: 'https://europaplus.ru/img/logo.png',
-      },
-      {
-        name: 'DFM',
-        stream: 'https://dfmhost.ru:8000/dfm',
-        logo: 'https://dfm.ru/logo.png',
-      },
-      {
-        name: 'Радио Дача',
-        stream: 'https://online.radiodacha.ru/DACHA',
-        logo: 'https://radiodacha.ru/assets/images/logo.png',
-      },
-    ];
+    const playButtons = document.querySelectorAll('.playBtn');
+    let currentAudio = null;
+    let currentBtn = null;
 
-    let current = 0;
-    const stationsContainer = document.getElementById('stations');
+    playButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const station = btn.closest('.station');
+        const streamUrl = station.dataset.url;
 
-    stations.forEach((s, i) => {
-      const el = document.createElement('div');
-      el.className = 'station' + (i === 0 ? ' active' : ' hidden');
-      el.innerHTML = `
-        <img class="logo" src="${s.logo}" alt="${s.name}" />
-        <div class="name">${s.name}</div>
-        <audio id="audio${i}" src="${s.stream}" autoplay></audio>
-        <div class="controls">
-          <button onclick="document.getElementById('audio${i}').pause()">⏸️ Пауза</button>
-          <button onclick="document.getElementById('audio${i}').play()">▶️ Воспроизвести</button>
-        </div>
-      `;
-      stationsContainer.appendChild(el);
-    });
-
-    function updateView(dir) {
-      const prev = current;
-      if (dir === 'next') current = (current + 1) % stations.length;
-      else if (dir === 'prev') current = (current - 1 + stations.length) % stations.length;
-
-      const all = document.querySelectorAll('.station');
-      all.forEach((el, i) => {
-        el.className = 'station hidden';
-        if (i === current) el.className = 'station active';
-        if (i === prev && current < prev) el.className = 'station inactive';
-      });
-      // Stop all
-      document.querySelectorAll('audio').forEach((a, i) => a.pause());
-      // Play current
-      document.getElementById(`audio${current}`).play();
-    }
-
-    document.addEventListener('keydown', e => {
-      if (e.key === 'ArrowDown') updateView('next');
-      if (e.key === 'ArrowUp') updateView('prev');
-    });
-
-    // Голосовое управление
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'ru-RU';
-    recognition.continuous = true;
-
-    recognition.onresult = (event) => {
-      const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
-      if (command.includes('следующая')) updateView('next');
-      if (command.includes('предыдущая')) updateView('prev');
-      stations.forEach((s, i) => {
-        if (command.includes(s.name.toLowerCase())) {
-          current = i;
-          updateView();
+        // Если кликнули по текущему воспроизведению — ставим на паузу
+        if(currentAudio && currentBtn === btn) {
+          currentAudio.pause();
+          currentAudio = null;
+          btn.textContent = '▶️';
+          btn.setAttribute('aria-pressed', 'false');
+          currentBtn = null;
+          return;
         }
-      });
-    };
-    recognition.start();
 
-    recognition.onend = () => recognition.start(); // Перезапуск
+        // Останавливаем предыдущий аудио
+        if(currentAudio) {
+          currentAudio.pause();
+          if(currentBtn) {
+            currentBtn.textContent = '▶️';
+            currentBtn.setAttribute('aria-pressed', 'false');
+          }
+        }
+
+        // Создаём новый аудио
+        currentAudio = new Audio(streamUrl);
+        currentAudio.volume = 1.0;
+        currentAudio.play();
+
+        // Меняем кнопку на паузу
+        btn.textContent = '⏸️';
+        btn.setAttribute('aria-pressed', 'true');
+        currentBtn = btn;
+      });
+    });
+
+    // Поддержка скролла с клавиатуры — фокусируемся на станциях
+    const radioContainer = document.getElementById('radioContainer');
+    radioContainer.addEventListener('keydown', e => {
+      if(e.key === 'ArrowDown') {
+        e.preventDefault();
+        let next = document.activeElement.nextElementSibling;
+        if(next && next.classList.contains('station')) {
+          next.focus();
+          // Остановим текущее аудио при смене станции
+          if(currentAudio) {
+            currentAudio.pause();
+            if(currentBtn) {
+              currentBtn.textContent = '▶️';
+              currentBtn.setAttribute('aria-pressed', 'false');
+              currentBtn = null;
+            }
+            currentAudio = null;
+          }
+        }
+      } else if(e.key === 'ArrowUp') {
+        e.preventDefault();
+        let prev = document.activeElement.previousElementSibling;
+        if(prev && prev.classList.contains('station')) {
+          prev.focus();
+          if(currentAudio) {
+            currentAudio.pause();
+            if(currentBtn) {
+              currentBtn.textContent = '▶️';
+              currentBtn.setAttribute('aria-pressed', 'false');
+              currentBtn = null;
+            }
+            currentAudio = null;
+          }
+        }
+      }
+    });
   </script>
 </body>
 </html>
