@@ -27,9 +27,6 @@
       position: relative;
     }
     header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 64px;
       padding: 1rem 1.2rem;
       text-align: center;
       font-size: 1.6rem;
@@ -37,8 +34,10 @@
       color: #000;
       font-weight: bold;
       box-shadow: 0 2px 10px #00ffe7aa;
-      user-select: none;
-      z-index: 1000;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 10;
     }
     #burgerBtn {
       position: absolute;
@@ -50,7 +49,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      z-index: 1010;
+      z-index: 11;
     }
     #burgerBtn span {
       display: block;
@@ -73,7 +72,9 @@
       display: flex;
       flex-direction: column;
     }
-    #sidebar.active { right: 0; }
+    #sidebar.active {
+      right: 0;
+    }
     #sidebarClose {
       align-self: flex-end;
       font-size: 2rem;
@@ -81,46 +82,45 @@
       cursor: pointer;
       user-select: none;
     }
+
     .radio-container {
-      margin-top: 64px;
+      margin-top: 72px;
       flex: 1;
       scroll-snap-type: y mandatory;
       overflow-y: auto;
       scroll-behavior: smooth;
-      height: calc(100vh - 64px);
+      height: calc(100vh - 72px);
       width: 100vw;
       overscroll-behavior: contain;
-      position: relative;
-      z-index: 5;
-      padding: 1rem 0 0 0;
+      padding: 1rem 0;
     }
+
     .station {
       scroll-snap-align: start;
-      height: 99vh;
-      max-height: 1000px;
-      margin: 0 auto 12px;
+      height: 70vh;
+      margin: 0 auto 2rem;
       padding: 2rem 1.5rem 5rem;
       background: rgba(0, 255, 231, 0.15);
       border: 2px solid #00ffe7cc;
       border-radius: 16px;
       backdrop-filter: blur(15px);
-      box-shadow: 0 0 40px #00ffe7bb;
+      box-shadow: 0 0 30px #00ffe7aa;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       position: relative;
       user-select: none;
+      max-width: 95%;
     }
     .station h2 {
-      font-size: 3.5rem;
+      font-size: 2.5rem;
       margin-bottom: 1.6rem;
-      text-align: center;
     }
     .visualizer {
       display: flex;
       gap: 7px;
-      margin-bottom: 4rem;
+      margin-bottom: 2.5rem;
     }
     .bar {
       width: 10px;
@@ -137,25 +137,28 @@
       0%, 100% { opacity: 0.3; }
       50% { opacity: 1; }
     }
+
     .controls {
       position: absolute;
       bottom: 25px;
       display: flex;
-      gap: 26px;
+      gap: 16px;
     }
     .btn {
-      padding: 0.85rem 1.5rem;
+      padding: 0.75rem 1.3rem;
       border: 2px solid var(--accent);
       background: transparent;
       color: var(--accent);
       font-weight: 700;
       border-radius: 16px;
       cursor: pointer;
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       user-select: none;
       transition: background 0.25s ease;
     }
-    .btn:hover:not(:disabled) { background: #00ffe744; }
+    .btn:hover:not(:disabled) {
+      background: #00ffe744;
+    }
     .btn:disabled {
       opacity: 0.3;
       cursor: not-allowed;
@@ -166,23 +169,32 @@
   <div class="app">
     <header>
       NeonRadio 🎧
-      <div id="burgerBtn"><span></span><span></span><span></span></div>
+      <div id="burgerBtn">
+        <span></span><span></span><span></span>
+      </div>
     </header>
 
-    <div id="sidebar">
+    <div id="sidebar" aria-hidden="true">
       <div id="sidebarClose">×</div>
-      <h3>Избранное</h3>
-      <ul id="favoritesList" style="list-style: none; padding: 0;"></ul>
+      <h3 style="margin-bottom: 0.5rem;">Избранное</h3>
+      <ul id="favoritesList" style="list-style: none; padding: 0; color: #fff;"></ul>
     </div>
 
     <div class="radio-container" id="radioContainer">
 
-      <!-- Радио Звезда -->
+      <div class="station" data-url="https://icecast.eradioportal.com:8000/europaplus.aac">
+        <h2>Europa Plus</h2>
+        <div class="visualizer"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+        <div class="controls">
+          <button class="btn playBtn">▶️</button>
+          <button class="btn pauseBtn" style="display:none;">⏸️</button>
+          <button class="btn favBtn">⭐ В избранное</button>
+        </div>
+      </div>
+
       <div class="station" data-url="http://radio.mediacdn.ru/radio/zvezda/zvezda_96">
         <h2>Радио Звезда</h2>
-        <div class="visualizer">
-          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        </div>
+        <div class="visualizer"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
         <div class="controls">
           <button class="btn playBtn">▶️</button>
           <button class="btn pauseBtn" style="display:none;">⏸️</button>
@@ -190,12 +202,9 @@
         </div>
       </div>
 
-      <!-- New Radio -->
       <div class="station" data-url="http://213.110.251.141:8001/new_radio">
-        <h2>New Radio</h2>
-        <div class="visualizer">
-          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        </div>
+        <h2>Новое Радио</h2>
+        <div class="visualizer"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
         <div class="controls">
           <button class="btn playBtn">▶️</button>
           <button class="btn pauseBtn" style="display:none;">⏸️</button>
@@ -203,12 +212,9 @@
         </div>
       </div>
 
-      <!-- Русское Радио Владивосток -->
       <div class="station" data-url="http://online2.gkvr.ru:8000/rusradio_vld_64.aac">
-        <h2>Русское Радио Владивосток</h2>
-        <div class="visualizer">
-          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        </div>
+        <h2>Русское Радио (Владивосток)</h2>
+        <div class="visualizer"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
         <div class="controls">
           <button class="btn playBtn">▶️</button>
           <button class="btn pauseBtn" style="display:none;">⏸️</button>
@@ -224,60 +230,69 @@
     const sidebar = document.getElementById('sidebar');
     const sidebarClose = document.getElementById('sidebarClose');
 
-    burgerBtn.onclick = () => sidebar.classList.add('active');
-    sidebarClose.onclick = () => sidebar.classList.remove('active');
+    burgerBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+      sidebar.setAttribute('aria-hidden', !sidebar.classList.contains('active'));
+    });
+    sidebarClose.addEventListener('click', () => {
+      sidebar.classList.remove('active');
+      sidebar.setAttribute('aria-hidden', 'true');
+    });
 
     const favoriteStations = new Map();
     const audio = new Audio();
-    let currentStation = null;
+    let currentPlayBtn = null;
+
+    document.querySelectorAll('.favBtn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const stationDiv = btn.closest('.station');
+        const title = stationDiv.querySelector('h2').innerText;
+        const favoritesList = document.getElementById('favoritesList');
+
+        if (favoriteStations.has(title)) {
+          favoriteStations.delete(title);
+          btn.innerText = '⭐ В избранное';
+          [...favoritesList.children].forEach(li => {
+            if (li.innerText === title) li.remove();
+          });
+        } else {
+          favoriteStations.set(title, stationDiv);
+          btn.innerText = '❌ Удалить из избранного';
+
+          const listItem = document.createElement('li');
+          listItem.innerText = title;
+          listItem.style.cursor = 'pointer';
+          listItem.addEventListener('click', () => {
+            stationDiv.scrollIntoView({ behavior: 'smooth' });
+          });
+
+          favoritesList.appendChild(listItem);
+        }
+      });
+    });
 
     document.querySelectorAll('.station').forEach(station => {
       const playBtn = station.querySelector('.playBtn');
       const pauseBtn = station.querySelector('.pauseBtn');
-      const favBtn = station.querySelector('.favBtn');
-      const title = station.querySelector('h2').innerText;
-      const streamUrl = station.dataset.url;
+      const url = station.dataset.url;
 
-      playBtn.onclick = () => {
-        if (currentStation !== station) {
-          audio.src = streamUrl;
-          audio.play();
-          document.querySelectorAll('.pauseBtn').forEach(b => b.style.display = 'none');
-          document.querySelectorAll('.playBtn').forEach(b => b.style.display = 'inline-block');
-          currentStation = station;
-        }
+      playBtn.addEventListener('click', () => {
+        if (audio.src !== url) audio.src = url;
         audio.play();
+        if (currentPlayBtn) {
+          currentPlayBtn.style.display = 'inline-block';
+          currentPlayBtn.nextElementSibling.style.display = 'none';
+        }
         playBtn.style.display = 'none';
         pauseBtn.style.display = 'inline-block';
-      };
+        currentPlayBtn = playBtn;
+      });
 
-      pauseBtn.onclick = () => {
+      pauseBtn.addEventListener('click', () => {
         audio.pause();
-        pauseBtn.style.display = 'none';
         playBtn.style.display = 'inline-block';
-      };
-
-      favBtn.onclick = () => {
-        const list = document.getElementById('favoritesList');
-        if (favoriteStations.has(title)) {
-          favoriteStations.delete(title);
-          favBtn.innerText = '⭐ В избранное';
-          [...list.children].forEach(li => {
-            if (li.innerText === title) li.remove();
-          });
-        } else {
-          favoriteStations.set(title, station);
-          favBtn.innerText = '❌ Удалить из избранного';
-          const li = document.createElement('li');
-          li.innerText = title;
-          li.style.cursor = 'pointer';
-          li.onclick = () => {
-            sidebar.classList.remove('active');
-            station.scrollIntoView({ behavior: 'smooth' });
-          };
-          list.appendChild(li);
-        }
-      };
+        pauseBtn.style.display = 'none';
+      });
     });
   </script>
 </body>
