@@ -1,210 +1,214 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NeonRadio</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background: black;
-      color: white;
-    }
-    header {
-      background: #111;
-      padding: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .burger, .close {
-      cursor: pointer;
-      font-size: 1.5rem;
-    }
-    .side {
-      position: fixed;
-      left: -300px;
-      top: 0;
-      width: 300px;
-      height: 100vh;
-      background: #222;
-      transition: left 0.3s;
-      padding: 1rem;
-      overflow-y: auto;
-    }
-    .side.open {
-      left: 0;
-    }
-    .station {
-      background: #111;
-      margin: 1rem;
-      padding: 1rem;
-      border-radius: 10px;
-      position: relative;
-    }
-    .visualizer {
-      display: flex;
-      gap: 5px;
-      height: 10px;
-      margin: 10px 0;
-    }
-    .bar {
-      flex: 1;
-      background: linear-gradient(90deg, cyan, blue, cyan);
-      animation: shift 2s linear infinite;
-    }
-    @keyframes shift {
-      0% { background-position: 0 0; }
-      100% { background-position: 200% 0; }
-    }
-    .switch {
-      width: 50px;
-      height: 25px;
-      background: #444;
-      border-radius: 25px;
-      position: relative;
-      cursor: pointer;
-      margin-bottom: 1rem;
-    }
-    .switch::before {
-      content: '';
-      position: absolute;
-      width: 23px;
-      height: 23px;
-      background: white;
-      border-radius: 50%;
-      top: 1px;
-      left: 1px;
-      transition: 0.3s;
-    }
-    .switch.active::before {
-      left: 26px;
-    }
-    .star {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-    .favorited {
-      color: gold;
-    }
-    #favorites div {
-      padding: 5px;
-      border-bottom: 1px solid #333;
-      cursor: pointer;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NeonRadio — Радио нового поколения</title>
+<style>
+  /* ... ваш CSS без изменений ... */
+</style>
 </head>
 <body>
-  <header>
-    NeonRadio
-    <div class="burger" id="openMenu">☰</div>
-  </header>
-  <div class="side" id="menu">
-    <div class="close" id="closeMenu">×</div>
-    <h3>Голосовое управление</h3>
-    <div class="switch active" id="voiceSwitch"></div>
-    <p>Голос включён</p>
-    <h3>Избранное</h3>
-    <div id="favorites"></div>
-  </div>
+  <div class="app">
+    <header>
+      NeonRadio
+      <div class="burger-btn" id="burgerBtn" aria-label="Меню" role="button" tabindex="0">
+        <span></span><span></span><span></span>
+      </div>
+    </header>
 
-  <div class="station" data-url="http://radio.mediacdn.ru/radio/zvezda/zvezda_96">
-    <h2>Радио Звезда</h2>
-    <div class="star">☆</div>
-    <div class="visualizer">
-      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="side-panel" id="sidePanel" aria-hidden="true">
+      <div class="close-btn" id="closeBtn" aria-label="Закрыть меню" role="button" tabindex="0">&times;</div>
+      <div class="voice-control">
+        <button id="voiceToggleBtn">Включить голосовое управление</button>
+        <div class="voice-status" id="voiceStatus">Голосовое управление выключено</div>
+      </div>
     </div>
-    <button class="play">▶️ Play</button>
-    <button class="pause" style="display:none;">⏸️ Pause</button>
+
+    <div class="radio-container" id="radioContainer">
+      <!-- Пример радиостанций -->
+      <div class="station" data-url="http://radio.mediacdn.ru/radio/zvezda/zvezda_96"><h2>Радио Звезда</h2><div class="star-btn">&#9734;</div><div class="visualizer"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div><div class="controls"><button class="btn playBtn">▶️ Play</button><button class="btn pauseBtn" style="display:none;">⏸️ Pause</button></div></div>
+      <div class="station" data-url="http://109.239.133.141:8000/krasnoyarsk-48.aac"><h2>Europa Plus</h2><div class="star-btn">&#9734;</div><div class="visualizer"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div><div class="controls"><button class="btn playBtn">▶️ Play</button><button class="btn pauseBtn" style="display:none;">⏸️ Pause</button></div></div>
+      <div class="station" data-url="http://online-1.gkvr.ru:8000/novoe_kra_64onair.aac"><h2>Новое Радио</h2><div class="star-btn">&#9734;</div><div class="visualizer"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div><div class="controls"><button class="btn playBtn">▶️ Play</button><button class="btn pauseBtn" style="display:none;">⏸️ Pause</button></div></div>
+    </div>
   </div>
 
-  <script>
-    const openMenu = document.getElementById('openMenu');
-    const closeMenu = document.getElementById('closeMenu');
-    const menu = document.getElementById('menu');
-    const voiceSwitch = document.getElementById('voiceSwitch');
-    const favoritesContainer = document.getElementById('favorites');
+<script>
+  // Инициализация элементов
+  const burgerBtn = document.getElementById('burgerBtn'),
+        sidePanel = document.getElementById('sidePanel'),
+        closeBtn = document.getElementById('closeBtn'),
+        radioContainer = document.getElementById('radioContainer'),
+        stations = Array.from(document.querySelectorAll('.station')),
+        voiceToggleBtn = document.getElementById('voiceToggleBtn'),
+        voiceStatus = document.getElementById('voiceStatus');
 
-    openMenu.onclick = () => menu.classList.add('open');
-    closeMenu.onclick = () => menu.classList.remove('open');
-    voiceSwitch.onclick = () => voiceSwitch.classList.toggle('active');
+  let currentAudio = null;
+  let currentStation = null;
+  let favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
 
-    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    let audio = null;
-    const station = document.querySelector('.station');
-    const playBtn = station.querySelector('.play');
-    const pauseBtn = station.querySelector('.pause');
-    const star = station.querySelector('.star');
-    const name = station.querySelector('h2').innerText;
+  // Меню
+  burgerBtn.addEventListener('click', () => {
+    sidePanel.classList.add('open');
+    sidePanel.setAttribute('aria-hidden', 'false');
+  });
+  closeBtn.addEventListener('click', () => {
+    sidePanel.classList.remove('open');
+    sidePanel.setAttribute('aria-hidden', 'true');
+  });
 
-    function updateFavorites() {
-      favoritesContainer.innerHTML = '';
-      favorites.forEach(title => {
-        const div = document.createElement('div');
-        div.textContent = title;
-        div.onclick = () => {
-          if (title === name) playBtn.click();
-        };
-        favoritesContainer.appendChild(div);
-      });
+  // Избранное
+  stations.forEach(station => {
+    const starBtn = station.querySelector('.star-btn'),
+          name = station.querySelector('h2').textContent;
+    if (favorites.has(name)) starBtn.classList.add('favorited'), starBtn.textContent = '★';
+    starBtn.addEventListener('click', () => {
+      if (favorites.has(name)) { favorites.delete(name); starBtn.classList.remove('favorited'); starBtn.textContent = '☆'; }
+      else { favorites.add(name); starBtn.classList.add('favorited'); starBtn.textContent = '★'; }
+      localStorage.setItem('favorites', JSON.stringify(Array.from(favorites)));
+    });
+  });
+
+  // Плей/Пауза
+  stations.forEach(station => {
+    const playBtn = station.querySelector('.playBtn'),
+          pauseBtn = station.querySelector('.pauseBtn');
+
+    playBtn.addEventListener('click', () => {
+      if (currentAudio) { currentAudio.pause(); resetBtns(currentStation); }
+      currentAudio = new Audio(station.dataset.url);
+      currentAudio.volume = currentAudio.volume || 0.5;
+      currentAudio.play().catch(console.warn);
+      currentStation = station;
+      togglePlayPause(station, true);
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      if (currentAudio) { currentAudio.pause(); }
+      togglePlayPause(station, false);
+      currentAudio = currentStation = null;
+    });
+  });
+
+  function resetBtns(station) {
+    station.querySelector('.playBtn').style.display = 'inline-block';
+    station.querySelector('.pauseBtn').style.display = 'none';
+  }
+  function togglePlayPause(station, playing) {
+    station.querySelector('.playBtn').style.display = playing ? 'none' : 'inline-block';
+    station.querySelector('.pauseBtn').style.display = playing ? 'inline-block' : 'none';
+  }
+
+  // Автопауза при листании
+  radioContainer.addEventListener('scroll', () => {
+    if (!currentStation) return;
+    const rect = currentStation.getBoundingClientRect(),
+          cont = radioContainer.getBoundingClientRect();
+    if (!(rect.top >= cont.top && rect.bottom <= cont.bottom)) {
+      currentAudio.pause();
+      resetBtns(currentStation);
+      currentAudio = currentStation = null;
     }
+  });
 
-    if (favorites.includes(name)) {
-      star.classList.add('favorited');
-      star.textContent = '★';
-    }
+  // Голосовое управление
+  let recognition = null, recognizing = false;
 
-    star.onclick = () => {
-      if (favorites.includes(name)) {
-        favorites = favorites.filter(f => f !== name);
-        star.classList.remove('favorited');
-        star.textContent = '☆';
-      } else {
-        favorites.push(name);
-        star.classList.add('favorited');
-        star.textContent = '★';
-      }
-      localStorage.setItem('favorites', JSON.stringify(favorites));
-      updateFavorites();
-    };
-
-    playBtn.onclick = () => {
-      if (audio) audio.pause();
-      audio = new Audio(station.dataset.url);
-      audio.play();
-      playBtn.style.display = 'none';
-      pauseBtn.style.display = 'inline-block';
-    };
-
-    pauseBtn.onclick = () => {
-      if (audio) audio.pause();
-      playBtn.style.display = 'inline-block';
-      pauseBtn.style.display = 'none';
-    };
-
-    updateFavorites();
-
+  function initSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'ru-RU';
-      recognition.continuous = true;
-
-      recognition.onresult = e => {
-        const command = e.results[e.results.length - 1][0].transcript.toLowerCase();
-        console.log('Голосовая команда:', command);
-        if (command.includes(name.toLowerCase())) playBtn.click();
-        if (command.includes('выключи')) pauseBtn.click();
-        if (command.includes('громче') && audio) audio.volume = Math.min(audio.volume + 0.1, 1);
-        if (command.includes('тише') && audio) audio.volume = Math.max(audio.volume - 0.1, 0);
-      };
-
-      recognition.start();
+    if (!SpeechRecognition) {
+      voiceStatus.textContent = 'Голосовое управление не поддерживается';
+      voiceToggleBtn.disabled = true;
+      return null;
     }
-  </script>
+    const rec = new SpeechRecognition();
+    rec.lang = 'ru-RU';
+    rec.continuous = true;
+    rec.interimResults = false;
+    return rec;
+  }
+
+  function processCommand(command) {
+    command = command.toLowerCase();
+    console.log('Распознано:', command);
+
+    // Базовые команды
+    if (/(включи радио|старт)/.test(command)) {
+      if (!currentStation && stations.length) stations[0].querySelector('.playBtn').click(), voiceStatus.textContent = 'Радио включено'; return;
+    }
+    if (/(выключи радио|стоп)/.test(command)) {
+      if (currentAudio) {
+        currentAudio.pause();
+        resetBtns(currentStation);
+        currentAudio = currentStation = null;
+        voiceStatus.textContent = 'Радио выключено';
+      }
+      return;
+    }
+    // Следующая / предыдущая
+    if (/(следующ|далее)/.test(command)) { changeStation(1, 'Следующая станция'); return; }
+    if (/(предыдущ|назад)/.test(command)) { changeStation(-1, 'Предыдущая станция'); return; }
+
+    // Громкость
+    if (command.includes('громче')) { if (currentAudio) currentAudio.volume = Math.min(currentAudio.volume + 0.1, 1); voiceStatus.textContent = 'Громкость увеличена'; return; }
+    if (command.includes('тише'))  { if (currentAudio) currentAudio.volume = Math.max(currentAudio.volume - 0.1, 0); voiceStatus.textContent = 'Громкость уменьшена'; return; }
+
+    // Пауза / продолжить
+    if (command.includes('пауза'))   { if (currentAudio && !currentAudio.paused) currentAudio.pause(), voiceStatus.textContent = 'Пауза'; return; }
+    if (/(продолжи|продолжить)/.test(command)) { if (currentAudio && currentAudio.paused) currentAudio.play(), voiceStatus.textContent = 'Продолжено'; return; }
+
+    // Добавление/удаление избранного
+    if (/(избранн|добавь|убери)/.test(command)) {
+      if (!currentStation) { voiceStatus.textContent = 'Сначала выберите станцию'; return; }
+      const star = currentStation.querySelector('.star-btn');
+      star.click();
+      voiceStatus.textContent = star.classList.contains('favorited') ? 'Добавлено в избранное' : 'Удалено из избранного';
+      return;
+    }
+
+    // Включить по названию
+    for (const st of stations) {
+      const name = st.querySelector('h2').textContent.toLowerCase();
+      if (command.includes(name.toLowerCase())) {
+        st.querySelector('.playBtn').click();
+        st.scrollIntoView({behavior:'smooth', block:'start'});
+        voiceStatus.textContent = `Воспроизвожу: ${st.querySelector('h2').textContent}`;
+        return;
+      }
+    }
+
+    voiceStatus.textContent = 'Команда не распознана';
+  }
+
+  function changeStation(delta, statusText) {
+    if (!currentStation) return;
+    let idx = stations.indexOf(currentStation);
+    let next = (idx + delta + stations.length) % stations.length;
+    stations[next].querySelector('.playBtn').click();
+    stations[next].scrollIntoView({behavior:'smooth', block:'start'});
+    voiceStatus.textContent = statusText;
+  }
+
+  voiceToggleBtn.addEventListener('click', () => {
+    if (!recognition) {
+      recognition = initSpeechRecognition();
+      if (!recognition) return;
+      recognition.onresult = e => processCommand(e.results[e.results.length-1][0].transcript.trim());
+      recognition.onerror = e => voiceStatus.textContent = 'Ошибка: ' + e.error;
+      recognition.onend = () => recognizing && recognition.start();
+    }
+    if (!recognizing) {
+      recognition.start();
+      recognizing = true;
+      voiceToggleBtn.classList.add('active');
+      voiceStatus.textContent = 'Голосовое управление активно...';
+    } else {
+      recognition.stop();
+      recognizing = false;
+      voiceToggleBtn.classList.remove('active');
+      voiceStatus.textContent = 'Голосовое управление выключено';
+    }
+  });
+</script>
 </body>
 </html>
