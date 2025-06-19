@@ -2,59 +2,259 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<title>Мини радио</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ретро Радио</title>
 <style>
-  body { background: #111; color: #0f0; font-family: monospace; text-align: center; padding: 50px; }
-  button { font-size: 1.2rem; padding: 10px 20px; margin: 10px; cursor: pointer; background: #0f0; border: none; border-radius: 8px; }
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  body {
+    margin: 0; 
+    height: 100vh;
+    background: radial-gradient(circle at center, #1a1a1a 0%, #000 80%);
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    font-family: 'Press Start 2P', cursive;
+    color: #0f0;
+    user-select: none;
+    overflow: hidden;
+  }
+
+  .radio-container {
+    background: #050905;
+    border: 8px solid #0f0;
+    border-radius: 30px;
+    width: 320px;
+    height: 480px;
+    box-shadow: 0 0 40px #0f0cc7 inset;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .screen {
+    background: #001100;
+    border: 4px solid #0f0;
+    border-radius: 12px;
+    width: 280px;
+    height: 120px;
+    margin-bottom: 40px;
+    box-shadow: 0 0 30px #00ff0080 inset;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    text-align: center;
+    padding: 10px;
+  }
+
+  .antenna {
+    position: absolute;
+    top: -40px;
+    right: 50px;
+    width: 10px;
+    height: 100px;
+    background: linear-gradient(90deg, #0f0 0%, #004000 50%, #0f0 100%);
+    border-radius: 5px;
+    animation: antennaWiggle 3s ease-in-out infinite;
+  }
+
+  @keyframes antennaWiggle {
+    0%, 100% { transform: rotate(0deg);}
+    50% { transform: rotate(10deg);}
+  }
+
+  .knob-container {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    border: 6px solid #0f0;
+    box-shadow: 0 0 20px #0f0 inset;
+    cursor: grab;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .knob {
+    width: 140px;
+    height: 140px;
+    background: radial-gradient(circle at center, #003300 0%, #001100 90%);
+    border-radius: 50%;
+    border: 6px solid #0f0;
+    box-shadow: 0 0 12px #00ff00 inset;
+    position: relative;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .knob:after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 40px;
+    background: #0f0;
+    border-radius: 3px;
+  }
+
+  .knob:hover {
+    box-shadow: 0 0 20px #0f0;
+  }
+
+  button {
+    margin-top: 30px;
+    background: #0f0;
+    border: none;
+    border-radius: 25px;
+    width: 120px;
+    height: 40px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 14px;
+    color: #000;
+    cursor: pointer;
+    box-shadow: 0 0 12px #0f0;
+    transition: background 0.3s ease;
+  }
+
+  button:hover {
+    background: #00cc00;
+  }
+
+  .lamp {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 16px;
+    height: 16px;
+    background: #0f0;
+    border-radius: 50%;
+    box-shadow: 0 0 15px #0f0;
+    animation: lampBlink 2s infinite;
+  }
+
+  @keyframes lampBlink {
+    0%, 100% { opacity: 1;}
+    50% { opacity: 0.2;}
+  }
+
+  audio {
+    display: none;
+  }
 </style>
 </head>
 <body>
 
-<h1>Мини Радио</h1>
-<audio id="radioPlayer" controls></audio><br/>
+<div class="radio-container" aria-label="Ретро радио плеер">
+  <div class="antenna" aria-hidden="true"></div>
+  <div class="lamp" aria-hidden="true"></div>
+  <div class="screen" id="stationName">Загрузка станции...</div>
 
-<button onclick="prev()">⏮️ Назад</button>
-<button onclick="togglePlay()">▶️/⏸️ Старт/Пауза</button>
-<button onclick="next()">⏭️ Вперёд</button>
+  <div class="knob-container" id="knobContainer" aria-label="Выбор радиостанции" role="slider" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0" tabindex="0" aria-valuetext="Первая станция">
+    <div class="knob"></div>
+  </div>
+
+  <button id="powerBtn" aria-pressed="true">ВКЛ / ВЫКЛ</button>
+  <audio id="radioAudio" autoplay></audio>
+</div>
 
 <script>
-const tracks = [
-  { name: "Радио Россия", url: "http://icecast.radio-t.com:8000/rr1" },
-  { name: "Ваша музыка", url: "http://stream.whatever.com/yourstream.mp3" },
-  // Добавляй свои ссылки на радио или mp3 поток
-];
+  const stations = [
+    { name: 'Радио Россия', url: 'http://icecast.radio-t.com:8000/rr1' },
+    { name: 'Электроника FM', url: 'https://icecast.radioreklama.bg/radio1rock256.mp3' },
+    { name: 'Чилл Радио', url: 'http://stream-uk1.radioparadise.com/mp3-128' },
+    { name: 'Ретро Волна', url: 'http://live.radioroks.ua/rokshandler/rock128.mp3' },
+    { name: 'Ночное Радио', url: 'http://streaming.radionomy.com/JazzRadio' },
+  ];
 
-let currentIndex = 0;
-const player = document.getElementById('radioPlayer');
+  const audio = document.getElementById('radioAudio');
+  const stationName = document.getElementById('stationName');
+  const powerBtn = document.getElementById('powerBtn');
+  const knobContainer = document.getElementById('knobContainer');
 
-function loadTrack(index) {
-  currentIndex = index;
-  player.src = tracks[currentIndex].url;
-  player.play();
-  document.title = "Радио: " + tracks[currentIndex].name;
-}
+  let currentIndex = 0;
+  let isPlaying = true;
+  let isDragging = false;
+  let startAngle = 0;
+  let currentRotation = 0;
 
-function togglePlay() {
-  if (player.paused) {
-    player.play();
-  } else {
-    player.pause();
+  function updateStation(index) {
+    if(index < 0) index = stations.length - 1;
+    if(index >= stations.length) index = 0;
+    currentIndex = index;
+    stationName.textContent = stations[currentIndex].name;
+    audio.src = stations[currentIndex].url;
+    if(isPlaying) audio.play();
+    else audio.pause();
+    knobContainer.setAttribute('aria-valuenow', currentIndex);
+    knobContainer.setAttribute('aria-valuetext', stations[currentIndex].name);
+    rotateKnob(currentIndex * (360 / stations.length));
   }
-}
 
-function next() {
-  currentIndex = (currentIndex + 1) % tracks.length;
-  loadTrack(currentIndex);
-}
+  function rotateKnob(deg) {
+    const knob = knobContainer.querySelector('.knob');
+    currentRotation = deg % 360;
+    knob.style.transform = `rotate(${currentRotation}deg)`;
+  }
 
-function prev() {
-  currentIndex = (currentIndex - 1 + tracks.length) % tracks.length;
-  loadTrack(currentIndex);
-}
+  function getAngle(x, y, centerX, centerY) {
+    return Math.atan2(y - centerY, x - centerX) * (180 / Math.PI);
+  }
 
-// Загрузка первого трека при старте
-loadTrack(currentIndex);
+  knobContainer.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    isDragging = true;
+    const rect = knobContainer.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    startAngle = getAngle(e.clientX, e.clientY, centerX, centerY) - currentRotation;
+  });
+
+  window.addEventListener('pointermove', (e) => {
+    if(!isDragging) return;
+    const rect = knobContainer.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    let angle = getAngle(e.clientX, e.clientY, centerX, centerY) - startAngle;
+    angle = (angle + 360) % 360;
+    rotateKnob(angle);
+
+    // Определяем индекс станции по углу
+    const sector = 360 / stations.length;
+    const newIndex = Math.floor((angle + sector / 2) / sector) % stations.length;
+    if(newIndex !== currentIndex) {
+      updateStation(newIndex);
+    }
+  });
+
+  window.addEventListener('pointerup', () => {
+    if(isDragging) {
+      isDragging = false;
+    }
+  });
+
+  powerBtn.addEventListener('click', () => {
+    if(isPlaying) {
+      audio.pause();
+      isPlaying = false;
+      powerBtn.textContent = 'ВЫКЛ';
+      powerBtn.setAttribute('aria-pressed', 'false');
+    } else {
+      audio.play();
+      isPlaying = true;
+      powerBtn.textContent = 'ВКЛ';
+      powerBtn.setAttribute('aria-pressed', 'true');
+    }
+  });
+
+  // Запускаем первую станцию
+  updateStation(currentIndex);
+
 </script>
-
 </body>
 </html>
