@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>NeonRadio — Europa Plus AAC</title>
+<title>NeonRadio — Радио нового поколения</title>
 <style>
   :root {
     --accent: #00ffe7;
     --bg-dark: #0a0a0f;
+    --header-height: 60px;
   }
   * {
     margin: 0; padding: 0; box-sizing: border-box;
@@ -25,19 +26,71 @@
     display: flex;
     flex-direction: column;
   }
+  header {
+    height: var(--header-height);
+    background: linear-gradient(90deg, #00ffe7, #007f7f);
+    color: #000;
+    font-weight: 700;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    box-shadow: 0 0 10px #00ffe7aa;
+    user-select: none;
+  }
+  .burger-btn {
+    cursor: pointer;
+    width: 30px;
+    height: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .burger-btn span {
+    display: block;
+    height: 4px;
+    background: var(--bg-dark);
+    border-radius: 2px;
+  }
+  .side-panel {
+    position: fixed;
+    top: var(--header-height);
+    right: -300px;
+    width: 300px;
+    height: calc(100vh - var(--header-height));
+    background: rgba(0, 0, 0, 0.85);
+    box-shadow: -5px 0 15px rgba(0, 255, 231, 0.5);
+    transition: right 0.3s ease;
+    z-index: 100;
+    padding: 1rem;
+    color: var(--accent);
+    user-select: none;
+  }
+  .side-panel.open {
+    right: 0;
+  }
+  .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+    user-select: none;
+  }
   .radio-container {
     flex: 1;
     overflow-y: scroll;
     scroll-snap-type: y mandatory;
     -webkit-overflow-scrolling: touch;
+    padding: 0 10px 70px;
   }
   .station {
     scroll-snap-align: start;
-    /* Панель высотой почти весь экран, минус 50 пикс */
-    height: calc(100vh - 50px);
-    margin-bottom: 50px; /* чтобы видно было следующую панель снизу */
-    margin-left: 10px;
-    margin-right: 10px;
+    height: calc(100vh - var(--header-height) - 70px);
+    margin-bottom: 70px;
     border-radius: 20px;
     background: rgba(0, 255, 231, 0.15);
     border: 2px solid #00ffe7cc;
@@ -51,7 +104,7 @@
     user-select: none;
   }
   h2 {
-    font-size: 3.5rem;
+    font-size: 3rem;
     margin-bottom: 2rem;
     text-align: center;
   }
@@ -108,8 +161,23 @@
 </head>
 <body>
   <div class="app">
+    <header>
+      NeonRadio
+      <div class="burger-btn" id="burgerBtn" aria-label="Меню" role="button" tabindex="0">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </header>
+
+    <div class="side-panel" id="sidePanel">
+      <div class="close-btn" id="closeBtn" aria-label="Закрыть меню" role="button" tabindex="0">&times;</div>
+      <!-- Пока пусто, сюда позже можно добавить меню -->
+      <p style="padding-top: 50px; text-align:center;">Меню пусто</p>
+    </div>
+
     <div class="radio-container" id="radioContainer">
-      <div class="station" data-url="http://online-2.gkvr.ru:8000/europa_kra_128.aac">
+      <div class="station" data-url="http://air.tvk6.ru/bfm256/tracks-a1/mono.m3u8">
         <h2>Europa Plus</h2>
         <div class="visualizer">
           <div class="bar"></div>
@@ -123,13 +191,24 @@
           <button class="btn pauseBtn" style="display:none;">⏸️ Pause</button>
         </div>
       </div>
-      <!-- Можно добавить еще станции здесь по аналогии -->
+      <!-- Можно добавить еще станции здесь -->
     </div>
   </div>
 
 <script>
+  const burgerBtn = document.getElementById('burgerBtn');
+  const sidePanel = document.getElementById('sidePanel');
+  const closeBtn = document.getElementById('closeBtn');
   const radioContainer = document.getElementById('radioContainer');
   const stations = radioContainer.querySelectorAll('.station');
+
+  burgerBtn.addEventListener('click', () => {
+    sidePanel.classList.add('open');
+  });
+  closeBtn.addEventListener('click', () => {
+    sidePanel.classList.remove('open');
+  });
+
   let currentAudio = null;
   let currentStation = null;
 
@@ -139,7 +218,6 @@
     const streamUrl = station.dataset.url;
 
     playBtn.addEventListener('click', () => {
-      // Остановить предыдущее аудио, если есть
       if(currentAudio){
         currentAudio.pause();
         currentAudio = null;
@@ -148,7 +226,6 @@
           currentStation.querySelector('.pauseBtn').style.display = 'none';
         }
       }
-      // Запустить новое аудио
       currentAudio = new Audio(streamUrl);
       currentAudio.volume = 1.0;
       currentAudio.play().catch(() => alert('Не удалось воспроизвести поток'));
@@ -167,7 +244,7 @@
     });
   });
 
-  // Остановить аудио при листании, чтобы не перескакивало
+  // Остановить аудио при листании
   let isScrolling;
   radioContainer.addEventListener('scroll', () => {
     window.clearTimeout(isScrolling);
@@ -183,22 +260,22 @@
     }, 100);
   });
 
-  // Жёсткий скролл по одному блоку (как в ТикТок)
+  // Жёсткий скролл по одному блоку (как в TikTok)
   radioContainer.addEventListener('wheel', e => {
     e.preventDefault();
     const delta = Math.sign(e.deltaY);
     const currentScroll = radioContainer.scrollTop;
-    const viewportHeight = window.innerHeight;
+    const viewportHeight = window.innerHeight - parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height'));
     if(delta > 0){
       // вниз
       radioContainer.scrollTo({
-        top: Math.min(currentScroll + viewportHeight - 50, radioContainer.scrollHeight),
+        top: Math.min(currentScroll + viewportHeight - 70, radioContainer.scrollHeight),
         behavior: 'smooth'
       });
     } else if(delta < 0){
       // вверх
       radioContainer.scrollTo({
-        top: Math.max(currentScroll - viewportHeight + 50, 0),
+        top: Math.max(currentScroll - viewportHeight + 70, 0),
         behavior: 'smooth'
       });
     }
