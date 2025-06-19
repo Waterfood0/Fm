@@ -1,260 +1,521 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Ретро Радио</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Радио Онлайн</title>
+  <style>
+    /* Основные стили и переменные цветов */
+    :root {
+      --color-dark-bg: #0a0f21;
+      --color-dark-text: #b0c4ff;
+      --color-dark-accent: #2f61ff;
+      --color-dark-shadow: #1e2a5b;
 
-  body {
-    margin: 0; 
-    height: 100vh;
-    background: radial-gradient(circle at center, #1a1a1a 0%, #000 80%);
-    display: flex; 
-    justify-content: center; 
-    align-items: center;
-    font-family: 'Press Start 2P', cursive;
-    color: #0f0;
-    user-select: none;
-    overflow: hidden;
-  }
+      --color-light-bg: #f0f4ff;
+      --color-light-text: #0a0f21;
+      --color-light-accent: #4169e1;
+      --color-light-shadow: #a1b3e5;
 
-  .radio-container {
-    background: #050905;
-    border: 8px solid #0f0;
-    border-radius: 30px;
-    width: 320px;
-    height: 480px;
-    box-shadow: 0 0 40px #0f0cc7 inset;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-  }
+      --radius: 12px;
+      --transition: 0.3s ease;
+    }
 
-  .screen {
-    background: #001100;
-    border: 4px solid #0f0;
-    border-radius: 12px;
-    width: 280px;
-    height: 120px;
-    margin-bottom: 40px;
-    box-shadow: 0 0 30px #00ff0080 inset;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 14px;
-    text-align: center;
-    padding: 10px;
-  }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--color-dark-bg);
+      color: var(--color-dark-text);
+      overflow: hidden;
+      user-select: none;
+      transition: background-color var(--transition), color var(--transition);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
 
-  .antenna {
-    position: absolute;
-    top: -40px;
-    right: 50px;
-    width: 10px;
-    height: 100px;
-    background: linear-gradient(90deg, #0f0 0%, #004000 50%, #0f0 100%);
-    border-radius: 5px;
-    animation: antennaWiggle 3s ease-in-out infinite;
-  }
+    body.light {
+      background-color: var(--color-light-bg);
+      color: var(--color-light-text);
+    }
 
-  @keyframes antennaWiggle {
-    0%, 100% { transform: rotate(0deg);}
-    50% { transform: rotate(10deg);}
-  }
+    .radio-container {
+      background: var(--color-dark-shadow);
+      border-radius: var(--radius);
+      box-shadow: 0 0 20px var(--color-dark-accent);
+      width: 320px;
+      padding: 25px 30px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      transition: background-color var(--transition), box-shadow var(--transition);
+      position: relative;
+    }
 
-  .knob-container {
-    position: relative;
-    width: 180px;
-    height: 180px;
-    border-radius: 50%;
-    border: 6px solid #0f0;
-    box-shadow: 0 0 20px #0f0 inset;
-    cursor: grab;
-    user-select: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+    body.light .radio-container {
+      background: var(--color-light-shadow);
+      box-shadow: 0 0 20px var(--color-light-accent);
+    }
 
-  .knob {
-    width: 140px;
-    height: 140px;
-    background: radial-gradient(circle at center, #003300 0%, #001100 90%);
-    border-radius: 50%;
-    border: 6px solid #0f0;
-    box-shadow: 0 0 12px #00ff00 inset;
-    position: relative;
-    transition: box-shadow 0.3s ease;
-  }
+    h1 {
+      font-weight: 700;
+      font-size: 1.7rem;
+      margin-bottom: 0;
+      user-select: none;
+      text-align: center;
+    }
 
-  .knob:after {
-    content: "";
-    position: absolute;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 6px;
-    height: 40px;
-    background: #0f0;
-    border-radius: 3px;
-  }
+    /* Кнопка вкл/выкл */
+    #powerBtn {
+      background: transparent;
+      border: 3px solid var(--color-dark-accent);
+      border-radius: 50%;
+      width: 65px;
+      height: 65px;
+      cursor: pointer;
+      position: relative;
+      box-shadow: 0 0 12px var(--color-dark-accent);
+      transition: background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
+      outline: none;
+    }
 
-  .knob:hover {
-    box-shadow: 0 0 20px #0f0;
-  }
+    #powerBtn::after {
+      content: "";
+      position: absolute;
+      top: 12px; left: 50%;
+      transform: translateX(-50%);
+      width: 8px;
+      height: 28px;
+      background: var(--color-dark-accent);
+      border-radius: 4px;
+      transition: background-color var(--transition);
+    }
 
-  button {
-    margin-top: 30px;
-    background: #0f0;
-    border: none;
-    border-radius: 25px;
-    width: 120px;
-    height: 40px;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 14px;
-    color: #000;
-    cursor: pointer;
-    box-shadow: 0 0 12px #0f0;
-    transition: background 0.3s ease;
-  }
+    #powerBtn.active {
+      background: var(--color-dark-accent);
+      border-color: var(--color-dark-accent);
+      box-shadow: 0 0 24px var(--color-dark-accent);
+    }
 
-  button:hover {
-    background: #00cc00;
-  }
+    #powerBtn.active::after {
+      background: var(--color-dark-bg);
+    }
 
-  .lamp {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    width: 16px;
-    height: 16px;
-    background: #0f0;
-    border-radius: 50%;
-    box-shadow: 0 0 15px #0f0;
-    animation: lampBlink 2s infinite;
-  }
+    body.light #powerBtn {
+      border-color: var(--color-light-accent);
+      box-shadow: 0 0 12px var(--color-light-accent);
+    }
 
-  @keyframes lampBlink {
-    0%, 100% { opacity: 1;}
-    50% { opacity: 0.2;}
-  }
+    body.light #powerBtn::after {
+      background: var(--color-light-accent);
+    }
 
-  audio {
-    display: none;
-  }
-</style>
+    body.light #powerBtn.active {
+      background: var(--color-light-accent);
+      border-color: var(--color-light-accent);
+      box-shadow: 0 0 24px var(--color-light-accent);
+    }
+
+    body.light #powerBtn.active::after {
+      background: var(--color-light-bg);
+    }
+
+    /* Список каналов */
+    .channels {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 6px;
+      user-select: none;
+    }
+
+    /* Стили для scrollbar */
+    .channels::-webkit-scrollbar {
+      width: 6px;
+    }
+    .channels::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .channels::-webkit-scrollbar-thumb {
+      background: var(--color-dark-accent);
+      border-radius: 3px;
+      transition: background-color var(--transition);
+    }
+    body.light .channels::-webkit-scrollbar-thumb {
+      background: var(--color-light-accent);
+    }
+
+    /* Каждый канал */
+    .channel {
+      padding: 10px 18px;
+      background: var(--color-dark-bg);
+      border-radius: var(--radius);
+      cursor: pointer;
+      box-shadow: 0 0 6px transparent;
+      transition: box-shadow var(--transition), background-color var(--transition), color var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      user-select: none;
+      position: relative;
+    }
+
+    body.light .channel {
+      background: var(--color-light-bg);
+    }
+
+    .channel:hover {
+      box-shadow: 0 0 15px var(--color-dark-accent);
+      background: #1224ff22;
+    }
+
+    body.light .channel:hover {
+      box-shadow: 0 0 15px var(--color-light-accent);
+      background: #4169e133;
+    }
+
+    .channel.active {
+      box-shadow: 0 0 18px var(--color-dark-accent);
+      background: var(--color-dark-accent);
+      color: #000;
+      font-weight: 700;
+    }
+
+    body.light .channel.active {
+      box-shadow: 0 0 18px var(--color-light-accent);
+      background: var(--color-light-accent);
+      color: #fff;
+    }
+
+    /* Круглый индикатор "антенна" */
+    .antenna {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #00ff0044;
+      box-shadow: 0 0 6px #00ff00aa;
+      animation: antennaPulse 2s infinite ease-in-out;
+      pointer-events: none;
+    }
+
+    @keyframes antennaPulse {
+      0%, 100% { box-shadow: 0 0 6px #00ff00aa; background: #00ff0044; }
+      50% { box-shadow: 0 0 16px #00ff00ee; background: #00ff00bb; }
+    }
+
+    body.light .antenna {
+      background: #4169e144;
+      box-shadow: 0 0 6px #4169e1aa;
+      animation-name: antennaPulseLight;
+    }
+
+    @keyframes antennaPulseLight {
+      0%, 100% { box-shadow: 0 0 6px #4169e1aa; background: #4169e144; }
+      50% { box-shadow: 0 0 16px #4169e1ee; background: #4169e1bb; }
+    }
+
+    /* Крутилка переключения каналов */
+    .dial {
+      margin-top: 10px;
+      width: 140px;
+      height: 140px;
+      background: var(--color-dark-bg);
+      border-radius: 50%;
+      box-shadow: inset 0 0 25px #001166cc, 0 0 30px var(--color-dark-accent);
+      cursor: grab;
+      user-select: none;
+      position: relative;
+      transition: background-color var(--transition), box-shadow var(--transition);
+    }
+
+    body.light .dial {
+      background: var(--color-light-bg);
+      box-shadow: inset 0 0 25px #aaccffcc, 0 0 30px var(--color-light-accent);
+    }
+
+    .dial:active {
+      cursor: grabbing;
+    }
+
+    /* Маркер на крутилке */
+    .dial-marker {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 8px;
+      height: 30px;
+      background: var(--color-dark-accent);
+      border-radius: 4px;
+      box-shadow: 0 0 12px var(--color-dark-accent);
+      transition: background-color var(--transition);
+    }
+
+    body.light .dial-marker {
+      background: var(--color-light-accent);
+      box-shadow: 0 0 12px var(--color-light-accent);
+    }
+
+    /* Лампочка */
+    .lamp {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ffdd0044;
+      box-shadow: 0 0 15px #ffdd0055;
+      animation: lampBlink 3s infinite;
+      margin-top: 10px;
+    }
+
+    @keyframes lampBlink {
+      0%, 50%, 100% { opacity: 1; }
+      25%, 75% { opacity: 0.4; }
+    }
+
+    /* Переключатель темы */
+    #themeToggle {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: inherit;
+      font-size: 1.3rem;
+      user-select: none;
+      transition: color var(--transition);
+    }
+
+    #themeToggle:hover {
+      color: var(--color-dark-accent);
+    }
+
+    body.light #themeToggle:hover {
+      color: var(--color-light-accent);
+    }
+
+    /* Звуки кнопок (скрыто) */
+    audio {
+      display: none;
+    }
+
+  </style>
 </head>
 <body>
 
-<div class="radio-container" aria-label="Ретро радио плеер">
-  <div class="antenna" aria-hidden="true"></div>
-  <div class="lamp" aria-hidden="true"></div>
-  <div class="screen" id="stationName">Загрузка станции...</div>
+  <button id="themeToggle" title="Переключить тему">🌙</button>
 
-  <div class="knob-container" id="knobContainer" aria-label="Выбор радиостанции" role="slider" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0" tabindex="0" aria-valuetext="Первая станция">
-    <div class="knob"></div>
+  <div class="radio-container" role="main" aria-label="Интернет радио">
+    <h1>Радио Онлайн</h1>
+
+    <button id="powerBtn" aria-pressed="false" aria-label="Включить радио"></button>
+    <div class="antenna" aria-hidden="true"></div>
+
+    <div class="channels" tabindex="0" aria-label="Список радиоканалов">
+      <!-- Каналы будут вставлены скриптом -->
+    </div>
+
+    <div class="dial" aria-label="Крутилка переключения каналов" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="dial-marker"></div>
+    </div>
+
+    <div class="lamp" aria-hidden="true"></div>
   </div>
 
-  <button id="powerBtn" aria-pressed="true">ВКЛ / ВЫКЛ</button>
-  <audio id="radioAudio" autoplay></audio>
-</div>
+  <!-- Звуки -->
+  <audio id="soundClick" src="https://actions.google.com/sounds/v1/buttons/button_click.ogg" preload="auto"></audio>
+  <audio id="soundSwitch" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
 
 <script>
-  const stations = [
-    { name: 'Радио Россия', url: 'http://icecast.radio-t.com:8000/rr1' },
-    { name: 'Электроника FM', url: 'https://icecast.radioreklama.bg/radio1rock256.mp3' },
-    { name: 'Чилл Радио', url: 'http://stream-uk1.radioparadise.com/mp3-128' },
-    { name: 'Ретро Волна', url: 'http://live.radioroks.ua/rokshandler/rock128.mp3' },
-    { name: 'Ночное Радио', url: 'http://streaming.radionomy.com/JazzRadio' },
+  // Данные каналов — здесь можно расширять и подставлять потоки
+  const channels = [
+    {
+      name: 'Европа Плюс',
+      stream: 'https://ep128.hostingradio.ru:8050/ep128_mp3',
+      color: '#2f61ff'
+    },
+    {
+      name: 'Русское Радио',
+      stream: 'https://air.rusradio.ru:8000/rusradio128',
+      color: '#ff2f2f'
+    },
+    {
+      name: 'Авторадио',
+      stream: 'https://air.autoradio.ru:8000/autoradio128',
+      color: '#2fff87'
+    },
+    {
+      name: 'Дорожное Радио',
+      stream: 'https://dorognoe.hostingradio.ru/dorognoe128.mp3',
+      color: '#ffb32f'
+    },
+    {
+      name: 'Наше Радио',
+      stream: 'https://nashe1.hostingradio.ru:8050/nashe128.mp3',
+      color: '#ff61ff'
+    },
+    {
+      name: 'Love Radio',
+      stream: 'https://lovenet.hostingradio.ru:8050/lovenet128.mp3',
+      color: '#ff6a6a'
+    },
   ];
 
-  const audio = document.getElementById('radioAudio');
-  const stationName = document.getElementById('stationName');
+  const radioContainer = document.querySelector('.radio-container');
+  const channelsEl = document.querySelector('.channels');
   const powerBtn = document.getElementById('powerBtn');
-  const knobContainer = document.getElementById('knobContainer');
+  const dial = document.querySelector('.dial');
+  const dialMarker = dial.querySelector('.dial-marker');
+  const soundClick = document.getElementById('soundClick');
+  const soundSwitch = document.getElementById('soundSwitch');
+  const themeToggle = document.getElementById('themeToggle');
 
-  let currentIndex = 0;
-  let isPlaying = true;
+  let audio = new Audio();
+  let isPlaying = false;
+  let currentChannelIndex = 0;
+  let dialRotation = 0;
   let isDragging = false;
-  let startAngle = 0;
-  let currentRotation = 0;
+  let dragStartX = 0;
+  let dialStartRotation = 0;
+  let isLightTheme = false;
 
-  function updateStation(index) {
-    if(index < 0) index = stations.length - 1;
-    if(index >= stations.length) index = 0;
-    currentIndex = index;
-    stationName.textContent = stations[currentIndex].name;
-    audio.src = stations[currentIndex].url;
-    if(isPlaying) audio.play();
-    else audio.pause();
-    knobContainer.setAttribute('aria-valuenow', currentIndex);
-    knobContainer.setAttribute('aria-valuetext', stations[currentIndex].name);
-    rotateKnob(currentIndex * (360 / stations.length));
+  // Создаем список каналов в DOM
+  function renderChannels() {
+    channelsEl.innerHTML = '';
+    channels.forEach((ch, i) => {
+      const div = document.createElement('div');
+      div.className = 'channel';
+      div.textContent = ch.name;
+      div.style.borderLeft = `6px solid ${ch.color}`;
+      div.setAttribute('data-index', i);
+      if(i === currentChannelIndex) div.classList.add('active');
+      channelsEl.appendChild(div);
+
+      div.addEventListener('click', () => {
+        if(currentChannelIndex !== i) {
+          switchChannel(i);
+          playSound(soundClick);
+        }
+      });
+    });
   }
 
-  function rotateKnob(deg) {
-    const knob = knobContainer.querySelector('.knob');
-    currentRotation = deg % 360;
-    knob.style.transform = `rotate(${currentRotation}deg)`;
+  // Воспроизведение аудио
+  function playAudio() {
+    if(!isPlaying) return;
+    audio.play().catch(e => console.warn('Ошибка воспроизведения', e));
   }
 
-  function getAngle(x, y, centerX, centerY) {
-    return Math.atan2(y - centerY, x - centerX) * (180 / Math.PI);
+  // Пауза аудио
+  function pauseAudio() {
+    audio.pause();
   }
 
-  knobContainer.addEventListener('pointerdown', (e) => {
-    e.preventDefault();
+  // Переключение канала
+  function switchChannel(index) {
+    if(index < 0 || index >= channels.length) return;
+    currentChannelIndex = index;
+    audio.src = channels[index].stream;
+    audio.crossOrigin = "anonymous";
+    audio.load();
+    if(isPlaying) playAudio();
+    updateUI();
+    rotateDialToChannel(index);
+  }
+
+  // Обновляем UI активного канала
+  function updateUI() {
+    document.querySelectorAll('.channel').forEach(ch => ch.classList.remove('active'));
+    const activeCh = channelsEl.querySelector(`[data-index="${currentChannelIndex}"]`);
+    if(activeCh) activeCh.classList.add('active');
+  }
+
+  // Крутилка поворот
+  function rotateDialToChannel(index) {
+    // Угол поворота: 360 / количество каналов * индекс
+    const angle = (360 / channels.length) * index;
+    dialRotation = angle;
+    dial.style.transform = `rotate(${angle}deg)`;
+    dialMarker.style.transform = `translateX(-50%) rotate(${-angle}deg)`;
+  }
+
+  // Обработчик для крутилки (драг)
+  dial.addEventListener('pointerdown', e => {
     isDragging = true;
-    const rect = knobContainer.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    startAngle = getAngle(e.clientX, e.clientY, centerX, centerY) - currentRotation;
+    dragStartX = e.clientX;
+    dialStartRotation = dialRotation;
+    dial.setPointerCapture(e.pointerId);
   });
 
-  window.addEventListener('pointermove', (e) => {
+  dial.addEventListener('pointermove', e => {
     if(!isDragging) return;
-    const rect = knobContainer.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    let angle = getAngle(e.clientX, e.clientY, centerX, centerY) - startAngle;
-    angle = (angle + 360) % 360;
-    rotateKnob(angle);
-
-    // Определяем индекс станции по углу
-    const sector = 360 / stations.length;
-    const newIndex = Math.floor((angle + sector / 2) / sector) % stations.length;
-    if(newIndex !== currentIndex) {
-      updateStation(newIndex);
-    }
+    const deltaX = e.clientX - dragStartX;
+    // Мультипликатор для скорости вращения
+    dialRotation = dialStartRotation + deltaX * 1.5;
+    dial.style.transform = `rotate(${dialRotation}deg)`;
+    dialMarker.style.transform = `translateX(-50%) rotate(${-dialRotation}deg)`;
   });
 
-  window.addEventListener('pointerup', () => {
-    if(isDragging) {
-      isDragging = false;
-    }
+  dial.addEventListener('pointerup', e => {
+    if(!isDragging) return;
+    isDragging = false;
+    dial.releasePointerCapture(e.pointerId);
+
+    // После отпускания зафиксируем ближайший канал
+    const anglePerChannel = 360 / channels.length;
+    let normalizedAngle = dialRotation % 360;
+    if(normalizedAngle < 0) normalizedAngle += 360;
+    const channelIndex = Math.round(normalizedAngle / anglePerChannel) % channels.length;
+    switchChannel(channelIndex);
+    playSound(soundSwitch);
   });
 
+  // Кнопка вкл/выкл радио
   powerBtn.addEventListener('click', () => {
     if(isPlaying) {
-      audio.pause();
       isPlaying = false;
-      powerBtn.textContent = 'ВЫКЛ';
+      pauseAudio();
+      powerBtn.classList.remove('active');
       powerBtn.setAttribute('aria-pressed', 'false');
+      powerBtn.setAttribute('aria-label', 'Включить радио');
     } else {
-      audio.play();
       isPlaying = true;
-      powerBtn.textContent = 'ВКЛ';
+      playAudio();
+      powerBtn.classList.add('active');
       powerBtn.setAttribute('aria-pressed', 'true');
+      powerBtn.setAttribute('aria-label', 'Выключить радио');
     }
+    playSound(soundClick);
   });
 
-  // Запускаем первую станцию
-  updateStation(currentIndex);
+  // Воспроизведение звука нажатия
+  function playSound(sound) {
+    sound.currentTime = 0;
+    sound.volume = 0.1; // Тихо
+    sound.play().catch(() => {});
+  }
+
+  // Переключение темы
+  themeToggle.addEventListener('click', () => {
+    isLightTheme = !isLightTheme;
+    document.body.classList.toggle('light', isLightTheme);
+    themeToggle.textContent = isLightTheme ? '🌞' : '🌙';
+    playSound(soundClick);
+  });
+
+  // Инициализация
+  switchChannel(currentChannelIndex);
+  renderChannels();
 
 </script>
+
 </body>
 </html>
