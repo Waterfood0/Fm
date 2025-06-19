@@ -1,520 +1,406 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Радио Онлайн</title>
-  <style>
-    /* Основные стили и переменные цветов */
-    :root {
-      --color-dark-bg: #0a0f21;
-      --color-dark-text: #b0c4ff;
-      --color-dark-accent: #2f61ff;
-      --color-dark-shadow: #1e2a5b;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Современное Онлайн Радио</title>
+<style>
+  /* Переменные цветов */
+  :root {
+    --clr-dark-bg: #0a0f21;
+    --clr-dark-text: #b0c4ff;
+    --clr-dark-accent: #2f61ff;
+    --clr-dark-shadow: #1e2a5b;
 
-      --color-light-bg: #f0f4ff;
-      --color-light-text: #0a0f21;
-      --color-light-accent: #4169e1;
-      --color-light-shadow: #a1b3e5;
+    --clr-light-bg: #f0f4ff;
+    --clr-light-text: #0a0f21;
+    --clr-light-accent: #4169e1;
+    --clr-light-shadow: #a1b3e5;
 
-      --radius: 12px;
-      --transition: 0.3s ease;
-    }
+    --radius: 14px;
+    --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-    body {
-      margin: 0; padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--color-dark-bg);
-      color: var(--color-dark-text);
-      overflow: hidden;
-      user-select: none;
-      transition: background-color var(--transition), color var(--transition);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+  /* Базовые стили */
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--clr-dark-bg);
+    color: var(--clr-dark-text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+    transition: background-color var(--transition), color var(--transition);
+  }
 
-    body.light {
-      background-color: var(--color-light-bg);
-      color: var(--color-light-text);
-    }
+  body.light {
+    background-color: var(--clr-light-bg);
+    color: var(--clr-light-text);
+  }
 
-    .radio-container {
-      background: var(--color-dark-shadow);
-      border-radius: var(--radius);
-      box-shadow: 0 0 20px var(--color-dark-accent);
-      width: 320px;
-      padding: 25px 30px 40px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      transition: background-color var(--transition), box-shadow var(--transition);
-      position: relative;
-    }
+  /* Контейнер радио */
+  .radio {
+    background: var(--clr-dark-shadow);
+    border-radius: var(--radius);
+    width: 350px;
+    padding: 25px 30px 40px;
+    box-shadow:
+      0 8px 30px rgba(47,97,255,0.3),
+      inset 0 0 30px rgba(47,97,255,0.15);
+    transition: background var(--transition), box-shadow var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+  }
+  body.light .radio {
+    background: var(--clr-light-shadow);
+    box-shadow:
+      0 8px 30px rgba(65,105,225,0.3),
+      inset 0 0 30px rgba(65,105,225,0.15);
+  }
 
-    body.light .radio-container {
-      background: var(--color-light-shadow);
-      box-shadow: 0 0 20px var(--color-light-accent);
-    }
+  /* Заголовок */
+  .radio h1 {
+    font-weight: 700;
+    font-size: 1.9rem;
+    margin: 0;
+    user-select: none;
+  }
 
-    h1 {
-      font-weight: 700;
-      font-size: 1.7rem;
-      margin-bottom: 0;
-      user-select: none;
-      text-align: center;
-    }
+  /* Кнопка Вкл/Пауза */
+  .btn-power {
+    width: 75px; height: 75px;
+    border-radius: 50%;
+    background: transparent;
+    border: 3.5px solid var(--clr-dark-accent);
+    box-shadow:
+      0 0 14px var(--clr-dark-accent),
+      inset 0 0 20px var(--clr-dark-accent);
+    cursor: pointer;
+    position: relative;
+    transition:
+      background-color var(--transition),
+      border-color var(--transition),
+      box-shadow var(--transition);
+    outline: none;
+  }
+  body.light .btn-power {
+    border-color: var(--clr-light-accent);
+    box-shadow:
+      0 0 14px var(--clr-light-accent),
+      inset 0 0 20px var(--clr-light-accent);
+  }
 
-    /* Кнопка вкл/выкл */
-    #powerBtn {
-      background: transparent;
-      border: 3px solid var(--color-dark-accent);
-      border-radius: 50%;
-      width: 65px;
-      height: 65px;
-      cursor: pointer;
-      position: relative;
-      box-shadow: 0 0 12px var(--color-dark-accent);
-      transition: background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
-      outline: none;
-    }
+  /* Иконка воспроизведения */
+  .btn-power::before {
+    content: '';
+    position: absolute;
+    left: 28px;
+    top: 20px;
+    border-style: solid;
+    border-width: 18px 0 18px 28px;
+    border-color: transparent transparent transparent var(--clr-dark-accent);
+    transition: border-color var(--transition);
+  }
+  body.light .btn-power::before {
+    border-color: transparent transparent transparent var(--clr-light-accent);
+  }
 
-    #powerBtn::after {
-      content: "";
-      position: absolute;
-      top: 12px; left: 50%;
-      transform: translateX(-50%);
-      width: 8px;
-      height: 28px;
-      background: var(--color-dark-accent);
-      border-radius: 4px;
-      transition: background-color var(--transition);
-    }
+  /* Когда включено */
+  .btn-power.active {
+    background-color: var(--clr-dark-accent);
+    border-color: var(--clr-dark-accent);
+    box-shadow:
+      0 0 25px var(--clr-dark-accent),
+      inset 0 0 25px var(--clr-dark-accent);
+  }
+  body.light .btn-power.active {
+    background-color: var(--clr-light-accent);
+    border-color: var(--clr-light-accent);
+    box-shadow:
+      0 0 25px var(--clr-light-accent),
+      inset 0 0 25px var(--clr-light-accent);
+  }
+  .btn-power.active::before {
+    content: '';
+    width: 18px;
+    height: 28px;
+    background: var(--clr-dark-bg);
+    left: 28px;
+    top: 22px;
+    border: none;
+    clip-path: polygon(
+      0 0, 30% 0, 30% 100%, 0% 100%,
+      70% 0, 100% 0, 100% 100%, 70% 100%
+    );
+  }
+  body.light .btn-power.active::before {
+    background: var(--clr-light-bg);
+  }
 
-    #powerBtn.active {
-      background: var(--color-dark-accent);
-      border-color: var(--color-dark-accent);
-      box-shadow: 0 0 24px var(--color-dark-accent);
-    }
+  /* Список каналов */
+  .channels {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    user-select: none;
+    max-height: 260px;
+    overflow-y: auto;
+    padding-right: 8px;
+  }
 
-    #powerBtn.active::after {
-      background: var(--color-dark-bg);
-    }
+  /* Scrollbar */
+  .channels::-webkit-scrollbar {
+    width: 7px;
+  }
+  .channels::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .channels::-webkit-scrollbar-thumb {
+    background: var(--clr-dark-accent);
+    border-radius: 3px;
+    transition: background-color var(--transition);
+  }
+  body.light .channels::-webkit-scrollbar-thumb {
+    background: var(--clr-light-accent);
+  }
 
-    body.light #powerBtn {
-      border-color: var(--color-light-accent);
-      box-shadow: 0 0 12px var(--color-light-accent);
-    }
+  /* Отдельный канал */
+  .channel {
+    background: var(--clr-dark-bg);
+    padding: 15px 18px;
+    border-radius: var(--radius);
+    box-shadow:
+      0 4px 14px rgba(15, 31, 67, 0.3);
+    cursor: pointer;
+    transition:
+      box-shadow var(--transition),
+      background-color var(--transition),
+      transform var(--transition);
+    color: var(--clr-dark-text);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  body.light .channel {
+    background: #fff;
+    box-shadow:
+      0 4px 14px rgba(65, 105, 225, 0.15);
+    color: var(--clr-light-text);
+  }
 
-    body.light #powerBtn::after {
-      background: var(--color-light-accent);
-    }
+  .channel:hover {
+    box-shadow:
+      0 8px 20px var(--clr-dark-accent);
+    background: #1224ff22;
+    transform: translateY(-5px);
+  }
+  body.light .channel:hover {
+    box-shadow:
+      0 8px 20px var(--clr-light-accent);
+    background: #4169e133;
+  }
 
-    body.light #powerBtn.active {
-      background: var(--color-light-accent);
-      border-color: var(--color-light-accent);
-      box-shadow: 0 0 24px var(--color-light-accent);
-    }
+  /* Активный канал */
+  .channel.active {
+    box-shadow:
+      0 0 35px var(--clr-dark-accent);
+    background: var(--clr-dark-accent);
+    color: #000;
+    font-weight: 700;
+    transform: translateY(-6px);
+  }
+  body.light .channel.active {
+    box-shadow:
+      0 0 35px var(--clr-light-accent);
+    background: var(--clr-light-accent);
+    color: #fff;
+  }
 
-    body.light #powerBtn.active::after {
-      background: var(--color-light-bg);
-    }
+  /* Цветной акцент слева */
+  .channel::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 8px;
+    height: 100%;
+    background: var(--clr-dark-accent);
+    border-radius: var(--radius) 0 0 var(--radius);
+    transition: background var(--transition);
+    z-index: 1;
+  }
+  body.light .channel::before {
+    background: var(--clr-light-accent);
+  }
+  .channel.active::before {
+    filter: brightness(1.4);
+  }
 
-    /* Список каналов */
-    .channels {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      max-height: 220px;
-      overflow-y: auto;
-      padding-right: 6px;
-      user-select: none;
-    }
+  /* Цвет полосы для каждого канала */
+  .channel[data-color]::before {
+    background: attr(data-color color);
+  }
 
-    /* Стили для scrollbar */
-    .channels::-webkit-scrollbar {
-      width: 6px;
-    }
-    .channels::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .channels::-webkit-scrollbar-thumb {
-      background: var(--color-dark-accent);
-      border-radius: 3px;
-      transition: background-color var(--transition);
-    }
-    body.light .channels::-webkit-scrollbar-thumb {
-      background: var(--color-light-accent);
-    }
+  /* Кнопка переключения темы */
+  .theme-toggle {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    user-select: none;
+    color: var(--clr-dark-accent);
+    transition: color var(--transition);
+    z-index: 100;
+  }
+  body.light .theme-toggle {
+    color: var(--clr-light-accent);
+  }
 
-    /* Каждый канал */
-    .channel {
-      padding: 10px 18px;
-      background: var(--color-dark-bg);
-      border-radius: var(--radius);
-      cursor: pointer;
-      box-shadow: 0 0 6px transparent;
-      transition: box-shadow var(--transition), background-color var(--transition), color var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      user-select: none;
-      position: relative;
-    }
+  /* Плавное появление иконки */
+  .btn-power:focus, .channel:focus, .theme-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 8px 3px var(--clr-dark-accent);
+  }
+  body.light .btn-power:focus, body.light .channel:focus, body.light .theme-toggle:focus {
+    box-shadow: 0 0 8px 3px var(--clr-light-accent);
+  }
 
-    body.light .channel {
-      background: var(--color-light-bg);
-    }
-
-    .channel:hover {
-      box-shadow: 0 0 15px var(--color-dark-accent);
-      background: #1224ff22;
-    }
-
-    body.light .channel:hover {
-      box-shadow: 0 0 15px var(--color-light-accent);
-      background: #4169e133;
-    }
-
-    .channel.active {
-      box-shadow: 0 0 18px var(--color-dark-accent);
-      background: var(--color-dark-accent);
-      color: #000;
-      font-weight: 700;
-    }
-
-    body.light .channel.active {
-      box-shadow: 0 0 18px var(--color-light-accent);
-      background: var(--color-light-accent);
-      color: #fff;
-    }
-
-    /* Круглый индикатор "антенна" */
-    .antenna {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: #00ff0044;
-      box-shadow: 0 0 6px #00ff00aa;
-      animation: antennaPulse 2s infinite ease-in-out;
-      pointer-events: none;
-    }
-
-    @keyframes antennaPulse {
-      0%, 100% { box-shadow: 0 0 6px #00ff00aa; background: #00ff0044; }
-      50% { box-shadow: 0 0 16px #00ff00ee; background: #00ff00bb; }
-    }
-
-    body.light .antenna {
-      background: #4169e144;
-      box-shadow: 0 0 6px #4169e1aa;
-      animation-name: antennaPulseLight;
-    }
-
-    @keyframes antennaPulseLight {
-      0%, 100% { box-shadow: 0 0 6px #4169e1aa; background: #4169e144; }
-      50% { box-shadow: 0 0 16px #4169e1ee; background: #4169e1bb; }
-    }
-
-    /* Крутилка переключения каналов */
-    .dial {
-      margin-top: 10px;
-      width: 140px;
-      height: 140px;
-      background: var(--color-dark-bg);
-      border-radius: 50%;
-      box-shadow: inset 0 0 25px #001166cc, 0 0 30px var(--color-dark-accent);
-      cursor: grab;
-      user-select: none;
-      position: relative;
-      transition: background-color var(--transition), box-shadow var(--transition);
-    }
-
-    body.light .dial {
-      background: var(--color-light-bg);
-      box-shadow: inset 0 0 25px #aaccffcc, 0 0 30px var(--color-light-accent);
-    }
-
-    .dial:active {
-      cursor: grabbing;
-    }
-
-    /* Маркер на крутилке */
-    .dial-marker {
-      position: absolute;
-      top: 12px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 8px;
-      height: 30px;
-      background: var(--color-dark-accent);
-      border-radius: 4px;
-      box-shadow: 0 0 12px var(--color-dark-accent);
-      transition: background-color var(--transition);
-    }
-
-    body.light .dial-marker {
-      background: var(--color-light-accent);
-      box-shadow: 0 0 12px var(--color-light-accent);
-    }
-
-    /* Лампочка */
-    .lamp {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #ffdd0044;
-      box-shadow: 0 0 15px #ffdd0055;
-      animation: lampBlink 3s infinite;
-      margin-top: 10px;
-    }
-
-    @keyframes lampBlink {
-      0%, 50%, 100% { opacity: 1; }
-      25%, 75% { opacity: 0.4; }
-    }
-
-    /* Переключатель темы */
-    #themeToggle {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      color: inherit;
-      font-size: 1.3rem;
-      user-select: none;
-      transition: color var(--transition);
-    }
-
-    #themeToggle:hover {
-      color: var(--color-dark-accent);
-    }
-
-    body.light #themeToggle:hover {
-      color: var(--color-light-accent);
-    }
-
-    /* Звуки кнопок (скрыто) */
-    audio {
-      display: none;
-    }
-
-  </style>
+</style>
 </head>
 <body>
 
-  <button id="themeToggle" title="Переключить тему">🌙</button>
+<button class="theme-toggle" aria-label="Переключить тему">🌙</button>
 
-  <div class="radio-container" role="main" aria-label="Интернет радио">
-    <h1>Радио Онлайн</h1>
-
-    <button id="powerBtn" aria-pressed="false" aria-label="Включить радио"></button>
-    <div class="antenna" aria-hidden="true"></div>
-
-    <div class="channels" tabindex="0" aria-label="Список радиоканалов">
-      <!-- Каналы будут вставлены скриптом -->
-    </div>
-
-    <div class="dial" aria-label="Крутилка переключения каналов" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-      <div class="dial-marker"></div>
-    </div>
-
-    <div class="lamp" aria-hidden="true"></div>
+<div class="radio" role="region" aria-label="Интернет радио">
+  <h1>Радио Онлайн</h1>
+  <button class="btn-power" aria-pressed="false" aria-label="Включить радио"></button>
+  <div class="channels" tabindex="0" aria-label="Список радиоканалов">
+    <!-- Каналы вставятся здесь -->
   </div>
-
-  <!-- Звуки -->
-  <audio id="soundClick" src="https://actions.google.com/sounds/v1/buttons/button_click.ogg" preload="auto"></audio>
-  <audio id="soundSwitch" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
+</div>
 
 <script>
-  // Данные каналов — здесь можно расширять и подставлять потоки
-  const channels = [
-    {
-      name: 'Европа Плюс',
-      stream: 'https://ep128.hostingradio.ru:8050/ep128_mp3',
-      color: '#2f61ff'
-    },
-    {
-      name: 'Русское Радио',
-      stream: 'https://air.rusradio.ru:8000/rusradio128',
-      color: '#ff2f2f'
-    },
-    {
-      name: 'Авторадио',
-      stream: 'https://air.autoradio.ru:8000/autoradio128',
-      color: '#2fff87'
-    },
-    {
-      name: 'Дорожное Радио',
-      stream: 'https://dorognoe.hostingradio.ru/dorognoe128.mp3',
-      color: '#ffb32f'
-    },
-    {
-      name: 'Наше Радио',
-      stream: 'https://nashe1.hostingradio.ru:8050/nashe128.mp3',
-      color: '#ff61ff'
-    },
-    {
-      name: 'Love Radio',
-      stream: 'https://lovenet.hostingradio.ru:8050/lovenet128.mp3',
-      color: '#ff6a6a'
-    },
+  const channelsData = [
+    {name: 'Европа Плюс', stream: 'https://ep128.hostingradio.ru:8050/ep128_mp3', color: '#2f61ff'},
+    {name: 'Русское Радио', stream: 'https://air.rusradio.ru:8000/rusradio128', color: '#ff2f2f'},
+    {name: 'Авторадио', stream: 'https://air.autoradio.ru:8000/autoradio128', color: '#2fff87'},
+    {name: 'Дорожное Радио', stream: 'https://dorognoe.hostingradio.ru/dorognoe128.mp3', color: '#ffb32f'},
+    {name: 'Наше Радио', stream: 'https://nashe1.hostingradio.ru:8050/nashe128.mp3', color: '#ff61ff'},
+    {name: 'Love Radio', stream: 'https://lovenet.hostingradio.ru:8050/lovenet128.mp3', color: '#ff6a6a'}
   ];
 
-  const radioContainer = document.querySelector('.radio-container');
-  const channelsEl = document.querySelector('.channels');
-  const powerBtn = document.getElementById('powerBtn');
-  const dial = document.querySelector('.dial');
-  const dialMarker = dial.querySelector('.dial-marker');
-  const soundClick = document.getElementById('soundClick');
-  const soundSwitch = document.getElementById('soundSwitch');
-  const themeToggle = document.getElementById('themeToggle');
+  const radioEl = document.querySelector('.radio');
+  const channelsEl = radioEl.querySelector('.channels');
+  const btnPower = radioEl.querySelector('.btn-power');
+  const themeToggle = document.querySelector('.theme-toggle');
 
   let audio = new Audio();
   let isPlaying = false;
   let currentChannelIndex = 0;
-  let dialRotation = 0;
-  let isDragging = false;
-  let dragStartX = 0;
-  let dialStartRotation = 0;
-  let isLightTheme = false;
 
-  // Создаем список каналов в DOM
+  // Рендерим каналы
   function renderChannels() {
     channelsEl.innerHTML = '';
-    channels.forEach((ch, i) => {
-      const div = document.createElement('div');
-      div.className = 'channel';
-      div.textContent = ch.name;
-      div.style.borderLeft = `6px solid ${ch.color}`;
-      div.setAttribute('data-index', i);
-      if(i === currentChannelIndex) div.classList.add('active');
-      channelsEl.appendChild(div);
-
-      div.addEventListener('click', () => {
+    channelsData.forEach((ch, i) => {
+      const chEl = document.createElement('div');
+      chEl.classList.add('channel');
+      chEl.textContent = ch.name;
+      chEl.setAttribute('tabindex', '0');
+      chEl.setAttribute('role', 'button');
+      chEl.setAttribute('aria-pressed', 'false');
+      chEl.setAttribute('data-color', ch.color);
+      chEl.style.setProperty('--color', ch.color);
+      if(i === currentChannelIndex) {
+        chEl.classList.add('active');
+        chEl.setAttribute('aria-pressed', 'true');
+      }
+      chEl.addEventListener('click', () => {
         if(currentChannelIndex !== i) {
           switchChannel(i);
-          playSound(soundClick);
+          playSoundClick();
         }
       });
+      chEl.addEventListener('keydown', e => {
+        if(e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          chEl.click();
+        }
+      });
+      channelsEl.appendChild(chEl);
     });
   }
 
-  // Воспроизведение аудио
-  function playAudio() {
-    if(!isPlaying) return;
-    audio.play().catch(e => console.warn('Ошибка воспроизведения', e));
-  }
-
-  // Пауза аудио
-  function pauseAudio() {
-    audio.pause();
-  }
-
-  // Переключение канала
-  function switchChannel(index) {
-    if(index < 0 || index >= channels.length) return;
-    currentChannelIndex = index;
-    audio.src = channels[index].stream;
-    audio.crossOrigin = "anonymous";
-    audio.load();
-    if(isPlaying) playAudio();
-    updateUI();
-    rotateDialToChannel(index);
-  }
-
-  // Обновляем UI активного канала
-  function updateUI() {
-    document.querySelectorAll('.channel').forEach(ch => ch.classList.remove('active'));
-    const activeCh = channelsEl.querySelector(`[data-index="${currentChannelIndex}"]`);
-    if(activeCh) activeCh.classList.add('active');
-  }
-
-  // Крутилка поворот
-  function rotateDialToChannel(index) {
-    // Угол поворота: 360 / количество каналов * индекс
-    const angle = (360 / channels.length) * index;
-    dialRotation = angle;
-    dial.style.transform = `rotate(${angle}deg)`;
-    dialMarker.style.transform = `translateX(-50%) rotate(${-angle}deg)`;
-  }
-
-  // Обработчик для крутилки (драг)
-  dial.addEventListener('pointerdown', e => {
-    isDragging = true;
-    dragStartX = e.clientX;
-    dialStartRotation = dialRotation;
-    dial.setPointerCapture(e.pointerId);
-  });
-
-  dial.addEventListener('pointermove', e => {
-    if(!isDragging) return;
-    const deltaX = e.clientX - dragStartX;
-    // Мультипликатор для скорости вращения
-    dialRotation = dialStartRotation + deltaX * 1.5;
-    dial.style.transform = `rotate(${dialRotation}deg)`;
-    dialMarker.style.transform = `translateX(-50%) rotate(${-dialRotation}deg)`;
-  });
-
-  dial.addEventListener('pointerup', e => {
-    if(!isDragging) return;
-    isDragging = false;
-    dial.releasePointerCapture(e.pointerId);
-
-    // После отпускания зафиксируем ближайший канал
-    const anglePerChannel = 360 / channels.length;
-    let normalizedAngle = dialRotation % 360;
-    if(normalizedAngle < 0) normalizedAngle += 360;
-    const channelIndex = Math.round(normalizedAngle / anglePerChannel) % channels.length;
-    switchChannel(channelIndex);
-    playSound(soundSwitch);
-  });
-
-  // Кнопка вкл/выкл радио
-  powerBtn.addEventListener('click', () => {
+  // Включить/выключить радио
+  btnPower.addEventListener('click', () => {
     if(isPlaying) {
-      isPlaying = false;
-      pauseAudio();
-      powerBtn.classList.remove('active');
-      powerBtn.setAttribute('aria-pressed', 'false');
-      powerBtn.setAttribute('aria-label', 'Включить радио');
+      stopRadio();
     } else {
-      isPlaying = true;
-      playAudio();
-      powerBtn.classList.add('active');
-      powerBtn.setAttribute('aria-pressed', 'true');
-      powerBtn.setAttribute('aria-label', 'Выключить радио');
+      startRadio();
     }
-    playSound(soundClick);
   });
 
-  // Воспроизведение звука нажатия
-  function playSound(sound) {
-    sound.currentTime = 0;
-    sound.volume = 0.1; // Тихо
-    sound.play().catch(() => {});
+  // Запуск радио
+  function startRadio() {
+    audio.src = channelsData[currentChannelIndex].stream;
+    audio.crossOrigin = "anonymous";
+    audio.play().catch(() => {});
+    isPlaying = true;
+    btnPower.classList.add('active');
+    btnPower.setAttribute('aria-pressed', 'true');
+    btnPower.setAttribute('aria-label', 'Выключить радио');
+    playSoundClick();
   }
 
-  // Переключение темы
+  // Остановка радио
+  function stopRadio() {
+    audio.pause();
+    isPlaying = false;
+    btnPower.classList.remove('active');
+    btnPower.setAttribute('aria-pressed', 'false');
+    btnPower.setAttribute('aria-label', 'Включить радио');
+    playSoundClick();
+  }
+
+  // Переключение каналов
+  function switchChannel(index) {
+    if(index < 0 || index >= channelsData.length) return;
+    currentChannelIndex = index;
+    renderChannels();
+    if(isPlaying) {
+      audio.src = channelsData[currentChannelIndex].stream;
+      audio.crossOrigin = "anonymous";
+      audio.play().catch(() => {});
+    }
+  }
+
+  // Звук нажатия (легкий щелчок)
+  function playSoundClick() {
+    const audioClick = new Audio('https://actions.google.com/sounds/v1/buttons/button_click.ogg');
+    audioClick.volume = 0.1;
+    audioClick.play().catch(() => {});
+  }
+
+  // Переключатель темы
+  let isLight = false;
   themeToggle.addEventListener('click', () => {
-    isLightTheme = !isLightTheme;
-    document.body.classList.toggle('light', isLightTheme);
-    themeToggle.textContent = isLightTheme ? '🌞' : '🌙';
-    playSound(soundClick);
+    isLight = !isLight;
+    document.body.classList.toggle('light', isLight);
+    themeToggle.textContent = isLight ? '🌞' : '🌙';
+    playSoundClick();
   });
 
-  // Инициализация
-  switchChannel(currentChannelIndex);
   renderChannels();
-
 </script>
 
 </body>
