@@ -2,155 +2,231 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NeonRadio — Радио нового поколения</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Умное Радио</title>
   <style>
     :root {
-      --bg-dark: #0a0a0f;
-      --bg-light: #ffffff;
-      --accent: #00ffe7;
-      --font-main: 'Segoe UI', sans-serif;
+      --main-bg: #0a0a0a;
+      --accent: #00bfff;
+      --text: #ffffff;
+      --soft: rgba(0, 191, 255, 0.3);
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body.light {
+      --main-bg: #ffffff;
+      --accent: #0077ff;
+      --text: #000000;
+      --soft: rgba(0, 119, 255, 0.1);
+    }
+
     body {
-      background-color: var(--bg-dark);
-      color: var(--accent);
-      font-family: var(--font-main);
-      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--main-bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
     }
-    .app {
-      height: 100vh;
-      width: 100vw;
+
+    .header {
       display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-    header {
+      justify-content: space-between;
+      align-items: center;
       padding: 1rem;
-      text-align: center;
+      background: var(--soft);
+    }
+
+    .menu-button {
       font-size: 1.5rem;
-      background: linear-gradient(90deg, #00ffe7, #007f7f);
-      color: #000;
+      cursor: pointer;
+    }
+
+    .radio-title {
+      font-size: 1.2rem;
       font-weight: bold;
-      box-shadow: 0 2px 10px #00ffe7aa;
     }
-    .radio-container {
-      flex: 1;
-      overflow-y: scroll;
-      scroll-snap-type: y mandatory;
-    }
-    .station {
-      scroll-snap-align: start;
-      height: 100vh;
+
+    .player {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      position: relative;
-      background: rgba(0, 255, 231, 0.1);
-      backdrop-filter: blur(8px);
-      border: 2px solid #00ffe744;
-      margin: 2px 0;
+      padding: 2rem;
     }
-    .station h2 {
-      font-size: 2rem;
-    }
-    .controls {
-      position: absolute;
-      bottom: 20px;
-      display: flex;
-      gap: 15px;
-    }
-    .btn {
-      padding: 0.7rem 1rem;
-      border: 2px solid #00ffe7;
-      background: transparent;
-      color: var(--accent);
-      font-weight: bold;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .btn:hover {
-      background: #00ffe722;
-    }
-    .visualizer {
-      width: 100%;
-      height: 120px;
-      position: absolute;
-      bottom: 80px;
-      display: flex;
-      justify-content: center;
-      gap: 4px;
-    }
-    .bar {
-      width: 6px;
-      background: var(--accent);
-      animation: beat 1s infinite;
-    }
-    .bar:nth-child(2) { animation-delay: 0.1s; }
-    .bar:nth-child(3) { animation-delay: 0.2s; }
-    .bar:nth-child(4) { animation-delay: 0.3s; }
-    .bar:nth-child(5) { animation-delay: 0.4s; }
 
-    @keyframes beat {
-      0%, 100% { height: 20px; }
-      50% { height: 100px; }
+    audio {
+      width: 100%;
+      max-width: 500px;
+      margin: 1rem 0;
+    }
+
+    .stations {
+      display: flex;
+      overflow-x: auto;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .station {
+      flex: 0 0 auto;
+      padding: 0.5rem 1rem;
+      background: var(--soft);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .station.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .menu {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 70%;
+      max-width: 300px;
+      height: 100%;
+      background: var(--main-bg);
+      color: var(--text);
+      box-shadow: -5px 0 10px rgba(0, 0, 0, 0.5);
+      transition: right 0.3s;
+      z-index: 100;
+      padding: 1rem;
+    }
+
+    .menu.open {
+      right: 0;
+    }
+
+    .menu label {
+      display: flex;
+      justify-content: space-between;
+      margin: 1rem 0;
+    }
+
+    .toggle {
+      width: 40px;
+      height: 20px;
+      background: var(--soft);
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: var(--accent);
+      border-radius: 50%;
+      transition: left 0.3s;
+    }
+
+    .toggle.active::after {
+      left: 22px;
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header>NeonRadio 🎧</header>
-    <div class="radio-container" id="radioContainer">
-      <!-- Example Station -->
-      <div class="station" data-url="https://stream-url1.com">
-        <h2>Europa Plus</h2>
-        <div class="visualizer">
-          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-          <div class="bar"></div><div class="bar"></div>
-        </div>
-        <div class="controls">
-          <button class="btn playBtn">▶️</button>
-          <button class="btn likeBtn">❤️ 53k</button>
-          <button class="btn commentBtn">💬</button>
-        </div>
-      </div>
-      <div class="station" data-url="https://stream-url2.com">
-        <h2>Love Radio</h2>
-        <div class="visualizer">
-          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-          <div class="bar"></div><div class="bar"></div>
-        </div>
-        <div class="controls">
-          <button class="btn playBtn">▶️</button>
-          <button class="btn likeBtn">❤️ 89k</button>
-          <button class="btn commentBtn">💬</button>
-        </div>
-      </div>
-      <!-- Add more stations -->
-    </div>
+  <div class="header">
+    <div class="menu-button" onclick="toggleMenu()">☰</div>
+    <div class="radio-title" id="radioTitle">Выберите радиостанцию</div>
+  </div>
+
+  <div class="player">
+    <audio id="audioPlayer" controls autoplay></audio>
+  </div>
+
+  <div class="stations" id="stations"></div>
+
+  <div class="menu" id="menu">
+    <h3>Меню</h3>
+    <label>Темная тема <div class="toggle" id="themeToggle" onclick="toggleTheme()"></div></label>
+    <label>Голосовое управление <div class="toggle" id="voiceToggle" onclick="toggleVoice()"></div></label>
   </div>
 
   <script>
-    const playButtons = document.querySelectorAll('.playBtn');
-    let currentAudio = null;
+    const radios = [
+      { name: 'Европа Плюс', stream: 'https://ep256.hostingradio.ru:8052/europaplus256.mp3' },
+      { name: 'Русское Радио', stream: 'https://rusradio.hostingradio.ru/rusradio96.aacp' },
+      { name: 'Авторадио', stream: 'https://avtoradio.hostingradio.ru/avtoradio96.aacp' },
+      { name: 'DFM', stream: 'https://dfm.hostingradio.ru/dfm96.aacp' }
+    ];
 
-    playButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const station = btn.closest('.station');
-        const streamUrl = station.dataset.url;
+    const player = document.getElementById('audioPlayer');
+    const stationsContainer = document.getElementById('stations');
+    const title = document.getElementById('radioTitle');
+    const themeToggle = document.getElementById('themeToggle');
+    const voiceToggle = document.getElementById('voiceToggle');
 
-        if (currentAudio) {
-          currentAudio.pause();
-        }
+    let currentIndex = 0;
+    let recognition = null;
+    let voiceActive = false;
 
-        const audio = new Audio(streamUrl);
-        audio.volume = 1.0;
-        audio.play();
-        currentAudio = audio;
+    function renderStations() {
+      radios.forEach((r, i) => {
+        const btn = document.createElement('div');
+        btn.className = 'station';
+        btn.textContent = r.name;
+        btn.onclick = () => selectStation(i);
+        stationsContainer.appendChild(btn);
       });
-    });
+      highlightStation();
+    }
+
+    function selectStation(index) {
+      currentIndex = index;
+      player.src = radios[index].stream;
+      title.textContent = radios[index].name;
+      highlightStation();
+    }
+
+    function highlightStation() {
+      document.querySelectorAll('.station').forEach((el, i) => {
+        el.classList.toggle('active', i === currentIndex);
+      });
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+      themeToggle.classList.toggle('active');
+    }
+
+    function toggleMenu() {
+      document.getElementById('menu').classList.toggle('open');
+    }
+
+    function toggleVoice() {
+      voiceActive = !voiceActive;
+      voiceToggle.classList.toggle('active');
+      if (voiceActive) startRecognition();
+      else if (recognition) recognition.stop();
+    }
+
+    function startRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return alert('Ваш браузер не поддерживает голосовое управление');
+
+      recognition = new SpeechRecognition();
+      recognition.lang = 'ru-RU';
+      recognition.continuous = true;
+
+      recognition.onresult = (event) => {
+        const text = event.results[event.resultIndex][0].transcript.trim().toLowerCase();
+        if (text.includes('следующая')) selectStation((currentIndex + 1) % radios.length);
+        radios.forEach((r, i) => {
+          if (text.includes(r.name.toLowerCase())) selectStation(i);
+        });
+      };
+
+      recognition.start();
+    }
+
+    renderStations();
   </script>
 </body>
 </html>
