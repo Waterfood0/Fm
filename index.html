@@ -44,7 +44,6 @@
       align-items: center;
       justify-content: center;
     }
-    /* Кнопка бургер */
     .burger {
       position: absolute;
       right: 1rem;
@@ -64,11 +63,10 @@
       border-radius: 2px;
       transition: 0.3s;
     }
-    /* Панель боковая */
     .side-panel {
       position: fixed;
       top: 0;
-      right: -320px; /* скрыта за экраном */
+      right: -320px;
       width: 320px;
       height: 100vh;
       background: rgba(0, 255, 231, 0.15);
@@ -83,7 +81,6 @@
     .side-panel.open {
       right: 0;
     }
-    /* Крестик закрытия */
     .close-btn {
       align-self: flex-end;
       font-size: 1.8rem;
@@ -106,29 +103,34 @@
 
     .radio-container {
       flex: 1;
-      overflow-y: scroll;
+      overflow-y: auto;
       scroll-snap-type: y mandatory;
       -webkit-overflow-scrolling: touch;
       position: relative;
       border-top: 2px solid rgba(0, 255, 231, 0.15);
       border-bottom: 2px solid rgba(0, 255, 231, 0.15);
+      padding: 1rem 0;
     }
     .station {
       scroll-snap-align: start;
-      height: 100vh;
+      max-height: 75vh; /* максимум 75% высоты экрана */
+      min-height: 350px;
+      margin: 1rem auto;
+      padding: 1.5rem 1.5rem 4rem;
+      width: 90%;
+      max-width: 450px;
       display: flex;
       flex-direction: column;
       align-items: center;
       position: relative;
       background: rgba(0, 255, 231, 0.07);
       backdrop-filter: blur(12px);
-      margin: 0;
-      padding: 2rem 1.5rem 5rem; /* добавлен большой паддинг снизу для кнопок */
       box-shadow:
         inset 0 -2px 2px -2px rgba(0, 255, 231, 0.15),
         inset 0 2px 2px -2px rgba(0, 255, 231, 0.15);
-      transition: background-color 0.4s ease, box-shadow 0.4s ease;
+      border-radius: 15px;
       user-select: none;
+      transition: background-color 0.4s ease, box-shadow 0.4s ease;
     }
     .station:hover {
       background: rgba(0, 255, 231, 0.12);
@@ -137,25 +139,21 @@
         inset 0 4px 4px -2px #00ffe766;
       cursor: pointer;
     }
-    /* Название сверху */
     .station h2 {
-      font-size: 2.5rem;
-      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      margin-bottom: 1rem;
       text-shadow: 0 0 8px #00ffe7aa;
-      user-select: text;
       align-self: center;
       z-index: 5;
+      user-select: text;
     }
 
-    /* Визуализация по центру */
+    /* Визуализация по центру внутри станции, но с ограничением по высоте */
     .visualizer {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      margin: auto 0; /* Центрируем вертикально */
       width: 100%;
-      max-width: 400px;
-      height: 120px;
+      max-width: 360px;
+      height: 100px;
       display: flex;
       justify-content: center;
       gap: 6px;
@@ -179,18 +177,14 @@
       50% { height: 100px; }
     }
 
-    /* Кнопки управления внизу */
+    /* Кнопки внизу станции */
     .controls {
       width: 100%;
-      max-width: 400px;
-      position: absolute;
-      bottom: 25px;
-      left: 50%;
-      transform: translateX(-50%);
       display: flex;
       justify-content: center;
       gap: 15px;
       user-select: none;
+      margin-top: 1.5rem;
       z-index: 10;
     }
     .btn {
@@ -228,8 +222,12 @@
 
     /* Адаптив */
     @media (max-width: 768px) {
+      .station {
+        max-height: 70vh;
+        width: 95%;
+      }
       .station h2 {
-        font-size: 2rem;
+        font-size: 1.8rem;
       }
       .btn {
         font-size: 1rem;
@@ -237,10 +235,14 @@
       }
       .visualizer {
         max-width: 300px;
-        height: 100px;
+        height: 90px;
       }
     }
     @media (max-width: 400px) {
+      .station {
+        max-height: 65vh;
+        width: 98%;
+      }
       .station h2 {
         font-size: 1.6rem;
       }
@@ -249,8 +251,8 @@
         padding: 0.5rem 0.8rem;
       }
       .visualizer {
-        max-width: 260px;
-        height: 90px;
+        max-width: 250px;
+        height: 75px;
       }
     }
   </style>
@@ -266,13 +268,8 @@
       </div>
     </header>
 
-    <div class="side-panel" id="sidePanel" aria-hidden="true">
-      <div class="close-btn" id="closeBtn" aria-label="Закрыть меню" role="button" tabindex="0">&times;</div>
-      <!-- Здесь пока пусто -->
-    </div>
-
     <div class="radio-container" id="radioContainer">
-      <div class="station" data-url="https://europaplus.hostingradio.ru/ep128.mp3">
+      <div class="station" data-url="https://icecast.evropa.plus/evropaplus.aac">
         <h2>Europa Plus</h2>
         <div class="visualizer">
           <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
@@ -283,21 +280,40 @@
           <button class="btn commentBtn">💬 Комментарии</button>
         </div>
       </div>
-      <div class="station" data-url="https://lovelive.hostingradio.ru/love128.mp3">
-        <h2>Love Radio</h2>
+
+      <div class="station" data-url="https://icecast.dfm.ru/dfm_aac_64">
+        <h2>DFM</h2>
         <div class="visualizer">
           <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
         </div>
         <div class="controls">
           <button class="btn playBtn">▶️ Play</button>
-          <button class="btn likeBtn">❤️ 89k</button>
+          <button class="btn likeBtn">❤️ 45k</button>
+          <button class="btn commentBtn">💬 Комментарии</button>
+        </div>
+      </div>
+
+      <div class="station" data-url="https://online.radiodacha.ru/dacha64">
+        <h2>Радио Дача</h2>
+        <div class="visualizer">
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+        <div class="controls">
+          <button class="btn playBtn">▶️ Play</button>
+          <button class="btn likeBtn">❤️ 23k</button>
           <button class="btn commentBtn">💬 Комментарии</button>
         </div>
       </div>
     </div>
   </div>
 
+  <div class="side-panel" id="sidePanel" aria-hidden="true" role="dialog" aria-label="Меню настроек">
+    <div class="close-btn" id="closeBtn" aria-label="Закрыть меню" role="button" tabindex="0">&times;</div>
+    <!-- Пока пусто, тут позже можно добавить настройки -->
+  </div>
+
   <script>
+    // Плеер
     const playButtons = document.querySelectorAll('.playBtn');
     let currentAudio = null;
     let currentBtn = null;
@@ -347,7 +363,7 @@
       sidePanel.setAttribute('aria-hidden', 'true');
     });
 
-    // Для удобства закрыть по Escape
+    // Закрыть меню по Escape
     document.addEventListener('keydown', (e) => {
       if(e.key === 'Escape' && sidePanel.classList.contains('open')) {
         sidePanel.classList.remove('open');
@@ -356,5 +372,4 @@
     });
   </script>
 </body>
-  </html>
-  
+</html>
