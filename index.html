@@ -3,230 +3,157 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Умное Радио</title>
+  <title>Радио Онлайн</title>
   <style>
-    :root {
-      --main-bg: #0a0a0a;
-      --accent: #00bfff;
-      --text: #ffffff;
-      --soft: rgba(0, 191, 255, 0.3);
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
     }
-
-    body.light {
-      --main-bg: #ffffff;
-      --accent: #0077ff;
-      --text: #000000;
-      --soft: rgba(0, 119, 255, 0.1);
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: var(--main-bg);
-      color: var(--text);
-      transition: background 0.3s, color 0.3s;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem;
-      background: var(--soft);
-    }
-
-    .menu-button {
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-
-    .radio-title {
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
-
-    .player {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-    }
-
-    audio {
-      width: 100%;
-      max-width: 500px;
-      margin: 1rem 0;
-    }
-
-    .stations {
-      display: flex;
-      overflow-x: auto;
-      gap: 1rem;
-      padding: 1rem;
-    }
-
-    .station {
-      flex: 0 0 auto;
-      padding: 0.5rem 1rem;
-      background: var(--soft);
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .station.active {
-      background: var(--accent);
-      color: white;
-    }
-
-    .menu {
-      position: fixed;
-      top: 0;
-      right: -100%;
-      width: 70%;
-      max-width: 300px;
+    html, body {
       height: 100%;
-      background: var(--main-bg);
-      color: var(--text);
-      box-shadow: -5px 0 10px rgba(0, 0, 0, 0.5);
-      transition: right 0.3s;
-      z-index: 100;
-      padding: 1rem;
+      background: linear-gradient(to bottom, #000000, #002244);
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+      color: #fff;
     }
-
-    .menu.open {
-      right: 0;
-    }
-
-    .menu label {
-      display: flex;
-      justify-content: space-between;
-      margin: 1rem 0;
-    }
-
-    .toggle {
-      width: 40px;
-      height: 20px;
-      background: var(--soft);
-      border-radius: 10px;
-      position: relative;
-      cursor: pointer;
-    }
-
-    .toggle::after {
-      content: '';
+    .station {
       position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 16px;
-      height: 16px;
-      background: var(--accent);
-      border-radius: 50%;
-      transition: left 0.3s;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      transition: transform 0.6s ease;
     }
-
-    .toggle.active::after {
-      left: 22px;
+    .station.hidden {
+      transform: translateY(100%);
+    }
+    .station.active {
+      transform: translateY(0);
+    }
+    .station.inactive {
+      transform: translateY(-100%);
+    }
+    .logo {
+      width: 160px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+    .name {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    .controls {
+      margin-top: 20px;
+    }
+    .controls button {
+      background: #004477;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 0 10px;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .controls button:hover {
+      background: #0066aa;
+    }
+    #voice-status {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.4);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="menu-button" onclick="toggleMenu()">☰</div>
-    <div class="radio-title" id="radioTitle">Выберите радиостанцию</div>
-  </div>
+  <div id="voice-status">🎙️ Голос: включен</div>
 
-  <div class="player">
-    <audio id="audioPlayer" controls autoplay></audio>
-  </div>
-
-  <div class="stations" id="stations"></div>
-
-  <div class="menu" id="menu">
-    <h3>Меню</h3>
-    <label>Темная тема <div class="toggle" id="themeToggle" onclick="toggleTheme()"></div></label>
-    <label>Голосовое управление <div class="toggle" id="voiceToggle" onclick="toggleVoice()"></div></label>
-  </div>
+  <div id="stations"></div>
 
   <script>
-    const radios = [
-      { name: 'Европа Плюс', stream: 'https://ep256.hostingradio.ru:8052/europaplus256.mp3' },
-      { name: 'Русское Радио', stream: 'https://rusradio.hostingradio.ru/rusradio96.aacp' },
-      { name: 'Авторадио', stream: 'https://avtoradio.hostingradio.ru/avtoradio96.aacp' },
-      { name: 'DFM', stream: 'https://dfm.hostingradio.ru/dfm96.aacp' }
+    const stations = [
+      {
+        name: 'Европа Плюс',
+        stream: 'https://ep256.hostingradio.ru:8052/europaplus256.mp3',
+        logo: 'https://europaplus.ru/img/logo.png',
+      },
+      {
+        name: 'DFM',
+        stream: 'https://dfmhost.ru:8000/dfm',
+        logo: 'https://dfm.ru/logo.png',
+      },
+      {
+        name: 'Радио Дача',
+        stream: 'https://online.radiodacha.ru/DACHA',
+        logo: 'https://radiodacha.ru/assets/images/logo.png',
+      },
     ];
 
-    const player = document.getElementById('audioPlayer');
+    let current = 0;
     const stationsContainer = document.getElementById('stations');
-    const title = document.getElementById('radioTitle');
-    const themeToggle = document.getElementById('themeToggle');
-    const voiceToggle = document.getElementById('voiceToggle');
 
-    let currentIndex = 0;
-    let recognition = null;
-    let voiceActive = false;
+    stations.forEach((s, i) => {
+      const el = document.createElement('div');
+      el.className = 'station' + (i === 0 ? ' active' : ' hidden');
+      el.innerHTML = `
+        <img class="logo" src="${s.logo}" alt="${s.name}" />
+        <div class="name">${s.name}</div>
+        <audio id="audio${i}" src="${s.stream}" autoplay></audio>
+        <div class="controls">
+          <button onclick="document.getElementById('audio${i}').pause()">⏸️ Пауза</button>
+          <button onclick="document.getElementById('audio${i}').play()">▶️ Воспроизвести</button>
+        </div>
+      `;
+      stationsContainer.appendChild(el);
+    });
 
-    function renderStations() {
-      radios.forEach((r, i) => {
-        const btn = document.createElement('div');
-        btn.className = 'station';
-        btn.textContent = r.name;
-        btn.onclick = () => selectStation(i);
-        stationsContainer.appendChild(btn);
+    function updateView(dir) {
+      const prev = current;
+      if (dir === 'next') current = (current + 1) % stations.length;
+      else if (dir === 'prev') current = (current - 1 + stations.length) % stations.length;
+
+      const all = document.querySelectorAll('.station');
+      all.forEach((el, i) => {
+        el.className = 'station hidden';
+        if (i === current) el.className = 'station active';
+        if (i === prev && current < prev) el.className = 'station inactive';
       });
-      highlightStation();
+      // Stop all
+      document.querySelectorAll('audio').forEach((a, i) => a.pause());
+      // Play current
+      document.getElementById(`audio${current}`).play();
     }
 
-    function selectStation(index) {
-      currentIndex = index;
-      player.src = radios[index].stream;
-      title.textContent = radios[index].name;
-      highlightStation();
-    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown') updateView('next');
+      if (e.key === 'ArrowUp') updateView('prev');
+    });
 
-    function highlightStation() {
-      document.querySelectorAll('.station').forEach((el, i) => {
-        el.classList.toggle('active', i === currentIndex);
+    // Голосовое управление
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'ru-RU';
+    recognition.continuous = true;
+
+    recognition.onresult = (event) => {
+      const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
+      if (command.includes('следующая')) updateView('next');
+      if (command.includes('предыдущая')) updateView('prev');
+      stations.forEach((s, i) => {
+        if (command.includes(s.name.toLowerCase())) {
+          current = i;
+          updateView();
+        }
       });
-    }
+    };
+    recognition.start();
 
-    function toggleTheme() {
-      document.body.classList.toggle('light');
-      themeToggle.classList.toggle('active');
-    }
-
-    function toggleMenu() {
-      document.getElementById('menu').classList.toggle('open');
-    }
-
-    function toggleVoice() {
-      voiceActive = !voiceActive;
-      voiceToggle.classList.toggle('active');
-      if (voiceActive) startRecognition();
-      else if (recognition) recognition.stop();
-    }
-
-    function startRecognition() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return alert('Ваш браузер не поддерживает голосовое управление');
-
-      recognition = new SpeechRecognition();
-      recognition.lang = 'ru-RU';
-      recognition.continuous = true;
-
-      recognition.onresult = (event) => {
-        const text = event.results[event.resultIndex][0].transcript.trim().toLowerCase();
-        if (text.includes('следующая')) selectStation((currentIndex + 1) % radios.length);
-        radios.forEach((r, i) => {
-          if (text.includes(r.name.toLowerCase())) selectStation(i);
-        });
-      };
-
-      recognition.start();
-    }
-
-    renderStations();
+    recognition.onend = () => recognition.start(); // Перезапуск
   </script>
 </body>
 </html>
