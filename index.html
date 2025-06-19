@@ -107,8 +107,22 @@
   }
   h2 {
     font-size: 3rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     text-align: center;
+  }
+  .star-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 2rem;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.3);
+    transition: color 0.3s ease;
+    user-select: none;
+  }
+  .star-btn.favorited {
+    color: gold;
+    text-shadow: 0 0 10px gold;
   }
   .controls {
     display: flex;
@@ -159,6 +173,35 @@
     0%, 100% { height: 20px; }
     50% { height: 100px; }
   }
+
+  /* Голосовое управление */
+  .voice-control {
+    margin-top: 40px;
+    border: 2px solid var(--accent);
+    padding: 1rem;
+    border-radius: 10px;
+    text-align: center;
+  }
+  .voice-control button {
+    padding: 0.8rem 1.5rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border-radius: 10px;
+    border: 2px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  .voice-control button.active {
+    background-color: rgba(0,255,231,0.3);
+    box-shadow: 0 0 10px var(--accent);
+  }
+  .voice-status {
+    margin-top: 10px;
+    font-size: 1rem;
+    min-height: 1.2em;
+  }
 </style>
 </head>
 <body>
@@ -172,15 +215,35 @@
       </div>
     </header>
 
-    <div class="side-panel" id="sidePanel">
+    <div class="side-panel" id="sidePanel" aria-hidden="true">
       <div class="close-btn" id="closeBtn" aria-label="Закрыть меню" role="button" tabindex="0">&times;</div>
-      <!-- Пока пусто, сюда позже можно добавить меню -->
-      <p style="padding-top: 50px; text-align:center;">Меню пусто</p>
+
+      <div class="voice-control">
+        <button id="voiceToggleBtn">Включить голосовое управление</button>
+        <div class="voice-status" id="voiceStatus">Голосовое управление выключено</div>
+      </div>
     </div>
 
     <div class="radio-container" id="radioContainer">
+      <div class="station" data-url="http://radio.mediacdn.ru/radio/zvezda/zvezda_96">
+        <h2>Радио Звезда</h2>
+        <div class="star-btn" title="Добавить в избранное" role="button" tabindex="0">&#9734;</div>
+        <div class="visualizer">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+        <div class="controls">
+          <button class="btn playBtn">▶️ Play</button>
+          <button class="btn pauseBtn" style="display:none;">⏸️ Pause</button>
+        </div>
+      </div>
+
       <div class="station" data-url="http://109.239.133.141:8000/krasnoyarsk-48.aac">
         <h2>Europa Plus</h2>
+        <div class="star-btn" title="Добавить в избранное" role="button" tabindex="0">&#9734;</div>
         <div class="visualizer">
           <div class="bar"></div>
           <div class="bar"></div>
@@ -196,6 +259,7 @@
 
       <div class="station" data-url="http://online-1.gkvr.ru:8000/novoe_kra_64onair.aac">
         <h2>Новое Радио</h2>
+        <div class="star-btn" title="Добавить в избранное" role="button" tabindex="0">&#9734;</div>
         <div class="visualizer">
           <div class="bar"></div>
           <div class="bar"></div>
@@ -212,77 +276,214 @@
   </div>
 
 <script>
+  // Элементы
   const burgerBtn = document.getElementById('burgerBtn');
   const sidePanel = document.getElementById('sidePanel');
   const closeBtn = document.getElementById('closeBtn');
   const radioContainer = document.getElementById('radioContainer');
-  const stations = radioContainer.querySelectorAll('.station');
-
-  burgerBtn.addEventListener('click', () => {
-    sidePanel.classList.add('open');
-  });
-  closeBtn.addEventListener('click', () => {
-    sidePanel.classList.remove('open');
-  });
+  const stations = Array.from(document.querySelectorAll('.station'));
+  const voiceToggleBtn = document.getElementById('voiceToggleBtn');
+  const voiceStatus = document.getElementById('voiceStatus');
 
   let currentAudio = null;
   let currentStation = null;
+  let favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
 
+  // Открытие/закрытие меню
+  burgerBtn.addEventListener('click', () => {
+    sidePanel.classList.add('open');
+    sidePanel.setAttribute('aria-hidden', 'false');
+  });
+  closeBtn.addEventListener('click', () => {
+    sidePanel.classList.remove('open');
+    sidePanel.setAttribute('aria-hidden', 'true');
+  });
+
+  // Инициализация звездочек (избранное)
+  stations.forEach(station => {
+    const starBtn = station.querySelector('.star-btn');
+    const name = station.querySelector('h2').textContent;
+    if (favorites.has(name)) {
+      starBtn.classList.add('favorited');
+      starBtn.textContent = '★';
+    }
+    starBtn.addEventListener('click', () => {
+      if (favorites.has(name)) {
+        favorites.delete(name);
+        starBtn.classList.remove('favorited');
+        starBtn.textContent = '☆';
+      } else {
+        favorites.add(name);
+        starBtn.classList.add('favorited');
+        starBtn.textContent = '★';
+      }
+      localStorage.setItem('favorites', JSON.stringify(Array.from(favorites)));
+    });
+  });
+
+  // Воспроизведение, пауза, переключение станций
   stations.forEach(station => {
     const playBtn = station.querySelector('.playBtn');
     const pauseBtn = station.querySelector('.pauseBtn');
-    const streamUrl = station.dataset.url;
 
     playBtn.addEventListener('click', () => {
-      if(currentAudio){
+      if (currentAudio) {
         currentAudio.pause();
-        currentAudio = null;
-        if(currentStation){
-          currentStation.querySelector('.playBtn').style.display = 'inline-block';
-          currentStation.querySelector('.pauseBtn').style.display = 'none';
+        if (currentStation) {
+          const prevPlay = currentStation.querySelector('.playBtn');
+          const prevPause = currentStation.querySelector('.pauseBtn');
+          prevPlay.style.display = 'inline-block';
+          prevPause.style.display = 'none';
         }
       }
-      currentAudio = new Audio(streamUrl);
-      currentAudio.volume = 1.0;
-      currentAudio.play().catch(() => alert('Не удалось воспроизвести поток'));
+      const url = station.dataset.url;
+      currentAudio = new Audio(url);
+      currentAudio.play().catch(console.warn);
       currentStation = station;
       playBtn.style.display = 'none';
       pauseBtn.style.display = 'inline-block';
     });
 
     pauseBtn.addEventListener('click', () => {
-      if(currentAudio){
+      if (currentAudio) {
         currentAudio.pause();
         currentAudio = null;
+        currentStation = null;
       }
       pauseBtn.style.display = 'none';
       playBtn.style.display = 'inline-block';
     });
   });
 
-  // Скролл по одной станции с snap
+  // Автоматическая остановка при листании (snap scroll)
   radioContainer.addEventListener('scroll', () => {
-    if(currentAudio && currentStation){
-      // Проверяем какая станция сейчас в зоне видимости
-      const containerRect = radioContainer.getBoundingClientRect();
-      stations.forEach(station => {
-        const rect = station.getBoundingClientRect();
-        // Если станция не в центре видимой области, выключаем аудио
-        if(station !== currentStation && !(rect.top >= containerRect.top && rect.bottom <= containerRect.bottom)){
-          // выключаем плеер у текущей станции
-          if(currentStation){
-            const playBtn = currentStation.querySelector('.playBtn');
-            const pauseBtn = currentStation.querySelector('.pauseBtn');
-            if(currentAudio){
-              currentAudio.pause();
-              currentAudio = null;
-            }
-            playBtn.style.display = 'inline-block';
-            pauseBtn.style.display = 'none';
-            currentStation = null;
+    if (!currentStation) return;
+    const containerRect = radioContainer.getBoundingClientRect();
+    stations.forEach(station => {
+      const rect = station.getBoundingClientRect();
+      // Если станция не видна (центр контейнера), выключаем
+      if (station !== currentStation) {
+        if (!(rect.top >= containerRect.top && rect.bottom <= containerRect.bottom)) {
+          if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
           }
+          const playBtn = currentStation.querySelector('.playBtn');
+          const pauseBtn = currentStation.querySelector('.pauseBtn');
+          playBtn.style.display = 'inline-block';
+          pauseBtn.style.display = 'none';
+          currentStation = null;
         }
-      });
+      }
+    });
+  });
+
+  // Голосовое управление (SpeechRecognition)
+  let recognition = null;
+  let recognizing = false;
+
+  function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      voiceStatus.textContent = 'Голосовое управление не поддерживается в этом браузере';
+      voiceToggleBtn.disabled = true;
+      return null;
+    }
+    const rec = new SpeechRecognition();
+    rec.lang = 'ru-RU';
+    rec.continuous = true;
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    return rec;
+  }
+
+  function processCommand(command) {
+    command = command.toLowerCase();
+    console.log('Распознано:', command);
+
+    if (command.includes('включи радио') || command.includes('старт')) {
+      if (!currentStation && stations.length) {
+        stations[0].querySelector('.playBtn').click();
+        voiceStatus.textContent = 'Радио включено';
+      }
+      return;
+    }
+    if (command.includes('выключи радио') || command.includes('стоп')) {
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+        if (currentStation) {
+          currentStation.querySelector('.playBtn').style.display = 'inline-block';
+          currentStation.querySelector('.pauseBtn').style.display = 'none';
+          currentStation = null;
+        }
+        voiceStatus.textContent = 'Радио выключено';
+      }
+      return;
+    }
+    if (command.includes('следующая') || command.includes('далее') || command.includes('следующий')) {
+      if (currentStation) {
+        let index = stations.indexOf(currentStation);
+        let nextIndex = (index + 1) % stations.length;
+        stations[nextIndex].querySelector('.playBtn').click();
+        stations[nextIndex].scrollIntoView({behavior:'smooth', block:'start'});
+        voiceStatus.textContent = 'Следующая станция';
+      }
+      return;
+    }
+    if (command.includes('предыдущая') || command.includes('назад') || command.includes('предыдущий')) {
+      if (currentStation) {
+        let index = stations.indexOf(currentStation);
+        let prevIndex = (index - 1 + stations.length) % stations.length;
+        stations[prevIndex].querySelector('.playBtn').click();
+        stations[prevIndex].scrollIntoView({behavior:'smooth', block:'start'});
+        voiceStatus.textContent = 'Предыдущая станция';
+      }
+      return;
+    }
+    if (command.includes('избранное') || command.includes('добавь в избранное') || command.includes('убери из избранного')) {
+      if (!currentStation) {
+        voiceStatus.textContent = 'Радио не выбрано';
+        return;
+      }
+      const starBtn = currentStation.querySelector('.star-btn');
+      if (starBtn.classList.contains('favorited')) {
+        starBtn.click(); // убираем из избранного
+        voiceStatus.textContent = 'Удалено из избранного';
+      } else {
+        starBtn.click(); // добавляем в избранное
+        voiceStatus.textContent = 'Добавлено в избранное';
+      }
+      return;
+    }
+    voiceStatus.textContent = 'Команда не распознана';
+  }
+
+  voiceToggleBtn.addEventListener('click', () => {
+    if (!recognition) {
+      recognition = initSpeechRecognition();
+      if (!recognition) return;
+      recognition.onresult = (event) => {
+        const transcript = event.results[event.results.length -1][0].transcript.trim();
+        processCommand(transcript);
+      };
+      recognition.onerror = (event) => {
+        voiceStatus.textContent = 'Ошибка распознавания: ' + event.error;
+      };
+      recognition.onend = () => {
+        if (recognizing) recognition.start(); // авторестарт для непрерывного прослушивания
+      };
+    }
+    if (!recognizing) {
+      recognition.start();
+      recognizing = true;
+      voiceStatus.textContent = 'Голосовое управление активно...';
+      voiceToggleBtn.classList.add('active');
+    } else {
+      recognition.stop();
+      recognizing = false;
+      voiceStatus.textContent = 'Голосовое управление выключено';
+      voiceToggleBtn.classList.remove('active');
     }
   });
 </script>
