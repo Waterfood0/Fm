@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>NeonRadio — Радио нового поколения</title>
+<title>NeonRadio — Europa Plus AAC</title>
 <style>
   :root {
-    --bg-dark: #0a0a0f;
     --accent: #00ffe7;
-    --font-main: 'Segoe UI', sans-serif;
+    --bg-dark: #0a0a0f;
   }
   * {
     margin: 0; padding: 0; box-sizing: border-box;
   }
-  body {
-    background-color: var(--bg-dark);
+  body, html {
+    height: 100%;
+    background: var(--bg-dark);
     color: var(--accent);
-    font-family: var(--font-main);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     overflow: hidden;
   }
   .app {
@@ -24,87 +24,25 @@
     width: 100vw;
     display: flex;
     flex-direction: column;
-    position: relative;
   }
-  header {
-    padding: 1rem 1.2rem;
-    text-align: center;
-    font-size: 1.6rem;
-    background: linear-gradient(90deg, #00ffe7, #007f7f);
-    color: #000;
-    font-weight: bold;
-    box-shadow: 0 2px 10px #00ffe7aa;
-    position: relative;
-    user-select: none;
-    z-index: 10;
-  }
-  /* Бургер кнопка */
-  #burgerBtn {
-    position: absolute;
-    right: 1rem;
-    top: 1rem;
-    width: 32px;
-    height: 24px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    z-index: 11;
-  }
-  #burgerBtn span {
-    display: block;
-    height: 4px;
-    background: var(--accent);
-    border-radius: 2px;
-    transition: 0.3s;
-  }
-  /* Сайдбар панель */
-  #sidebar {
-    position: fixed;
-    top: 0; right: -300px;
-    width: 300px;
-    height: 100vh;
-    background: rgba(0, 255, 231, 0.12);
-    backdrop-filter: blur(15px);
-    box-shadow: -3px 0 20px #00ffe7cc;
-    transition: right 0.35s ease;
-    z-index: 9999;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-  }
-  #sidebar.active {
-    right: 0;
-  }
-  #sidebarClose {
-    align-self: flex-end;
-    font-size: 2rem;
-    color: var(--accent);
-    cursor: pointer;
-    user-select: none;
-  }
-  /* Контейнер с вертикальным пейджингом */
   .radio-container {
     flex: 1;
-    scroll-snap-type: y mandatory;
     overflow-y: scroll;
-    scroll-behavior: smooth;
-    height: 100vh;
-    width: 100vw;
-    overscroll-behavior: contain;
+    scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
   }
-  /* Каждая станция — почти весь экран с небольшим отступом снизу */
   .station {
     scroll-snap-align: start;
-    height: 99vh;
-    max-height: 1000px;
-    margin: 0 auto 12px;
-    padding: 2rem 1.5rem 5rem;
+    /* Панель высотой почти весь экран, минус 50 пикс */
+    height: calc(100vh - 50px);
+    margin-bottom: 50px; /* чтобы видно было следующую панель снизу */
+    margin-left: 10px;
+    margin-right: 10px;
+    border-radius: 20px;
     background: rgba(0, 255, 231, 0.15);
     border: 2px solid #00ffe7cc;
-    border-radius: 16px;
-    backdrop-filter: blur(15px);
     box-shadow: 0 0 40px #00ffe7bb;
+    backdrop-filter: blur(15px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -112,297 +50,159 @@
     position: relative;
     user-select: none;
   }
-  .station h2 {
+  h2 {
     font-size: 3.5rem;
-    margin-bottom: 1.6rem;
-  }
-  .visualizer {
-    display: flex;
-    gap: 7px;
-    margin-bottom: 4rem;
-  }
-  .bar {
-    width: 10px;
-    background: var(--accent);
-    border-radius: 4px;
-    animation: beat 1.1s infinite;
-  }
-  .bar:nth-child(1) { animation-delay: 0; height: 35px; }
-  .bar:nth-child(2) { animation-delay: 0.15s; height: 75px; }
-  .bar:nth-child(3) { animation-delay: 0.3s; height: 110px; }
-  .bar:nth-child(4) { animation-delay: 0.45s; height: 65px; }
-  .bar:nth-child(5) { animation-delay: 0.6s; height: 30px; }
-
-  @keyframes beat {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 1; }
+    margin-bottom: 2rem;
+    text-align: center;
   }
   .controls {
-    position: absolute;
-    bottom: 25px;
     display: flex;
-    gap: 26px;
+    gap: 20px;
+    margin-top: auto;
+    margin-bottom: 40px;
   }
   .btn {
-    padding: 0.85rem 1.5rem;
-    border: 2px solid var(--accent);
-    background: transparent;
-    color: var(--accent);
+    padding: 0.9rem 2rem;
+    font-size: 1.3rem;
     font-weight: 700;
+    color: var(--accent);
+    background: transparent;
+    border: 2px solid var(--accent);
     border-radius: 16px;
     cursor: pointer;
-    font-size: 1.4rem;
+    transition: background-color 0.3s ease;
     user-select: none;
-    transition: background 0.25s ease;
   }
   .btn:hover:not(:disabled) {
-    background: #00ffe744;
+    background-color: rgba(0, 255, 231, 0.2);
   }
   .btn:disabled {
     opacity: 0.3;
     cursor: not-allowed;
   }
+  .visualizer {
+    width: 80%;
+    max-width: 600px;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 30px;
+  }
+  .bar {
+    width: 10px;
+    background: var(--accent);
+    animation: beat 1s infinite ease-in-out;
+    border-radius: 5px;
+  }
+  .bar:nth-child(2) { animation-delay: 0.1s; }
+  .bar:nth-child(3) { animation-delay: 0.2s; }
+  .bar:nth-child(4) { animation-delay: 0.3s; }
+  .bar:nth-child(5) { animation-delay: 0.4s; }
 
-  /* Адаптив */
-  @media (max-width: 1200px) {
-    .station {
-      height: 90vh;
-      max-height: 800px;
-      padding-bottom: 4rem;
-      margin-bottom: 8px;
-    }
-    .station h2 {
-      font-size: 3rem;
-    }
-    .btn {
-      font-size: 1.2rem;
-      padding: 0.7rem 1.3rem;
-    }
-  }
-  @media (max-width: 768px) {
-    .station {
-      height: 85vh;
-      max-height: 700px;
-      padding-bottom: 3.5rem;
-      margin-bottom: 7px;
-    }
-    .station h2 {
-      font-size: 2.5rem;
-    }
-    .btn {
-      font-size: 1.1rem;
-      padding: 0.6rem 1.1rem;
-    }
-  }
-  @media (max-width: 480px) {
-    .station {
-      height: 80vh;
-      max-height: 600px;
-      padding-bottom: 3rem;
-      margin-bottom: 6px;
-    }
-    .station h2 {
-      font-size: 2rem;
-    }
-    .btn {
-      font-size: 1rem;
-      padding: 0.5rem 1rem;
-    }
-    header {
-      font-size: 1.3rem;
-    }
+  @keyframes beat {
+    0%, 100% { height: 20px; }
+    50% { height: 100px; }
   }
 </style>
 </head>
 <body>
   <div class="app">
-    <header>
-      NeonRadio 🎧
-      <div id="burgerBtn" aria-label="Меню" title="Меню" role="button" tabindex="0">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-    </header>
-
-    <div id="sidebar" aria-hidden="true">
-      <div id="sidebarClose" aria-label="Закрыть меню" title="Закрыть меню" role="button" tabindex="0">×</div>
-      <!-- Пока пусто -->
-    </div>
-
     <div class="radio-container" id="radioContainer">
-
-      <div class="station" data-url="https://icecast.eradioportal.com:8000/europaplus.aac">
+      <div class="station" data-url="http://online-2.gkvr.ru:8000/europa_kra_128.aac">
         <h2>Europa Plus</h2>
         <div class="visualizer">
-          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
         </div>
         <div class="controls">
-          <button class="btn playBtn">▶️</button>
-          <button class="btn pauseBtn" style="display:none;">⏸️</button>
-          <button class="btn likeBtn">❤️ 53k</button>
-          <button class="btn commentBtn">💬</button>
+          <button class="btn playBtn">▶️ Play</button>
+          <button class="btn pauseBtn" style="display:none;">⏸️ Pause</button>
         </div>
       </div>
-
-      <div class="station" data-url="https://icecast.radio.net/radio/dfm_aac">
-        <h2>DFM</h2>
-        <div class="visualizer">
-          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        </div>
-        <div class="controls">
-          <button class="btn playBtn">▶️</button>
-          <button class="btn pauseBtn" style="display:none;">⏸️</button>
-          <button class="btn likeBtn">❤️ 40k</button>
-          <button class="btn commentBtn">💬</button>
-        </div>
-      </div>
-
-      <div class="station" data-url="https://icecast.radio.net/radio/radio-dacha-aac">
-        <h2>Радио Дача</h2>
-        <div class="visualizer">
-          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        </div>
-        <div class="controls">
-          <button class="btn playBtn">▶️</button>
-          <button class="btn pauseBtn" style="display:none;">⏸️</button>
-          <button class="btn likeBtn">❤️ 10k</button>
-          <button class="btn commentBtn">💬</button>
-        </div>
-      </div>
-
+      <!-- Можно добавить еще станции здесь по аналогии -->
     </div>
   </div>
 
 <script>
-  const playButtons = document.querySelectorAll('.playBtn');
-  const pauseButtons = document.querySelectorAll('.pauseBtn');
+  const radioContainer = document.getElementById('radioContainer');
+  const stations = radioContainer.querySelectorAll('.station');
   let currentAudio = null;
   let currentStation = null;
 
-  const scrollLockTime = 650;
-  let scrollLocked = false;
+  stations.forEach(station => {
+    const playBtn = station.querySelector('.playBtn');
+    const pauseBtn = station.querySelector('.pauseBtn');
+    const streamUrl = station.dataset.url;
 
-  function playStation(stationDiv) {
-    const url = stationDiv.dataset.url;
-    if (!url) return alert('Поток для этой станции не задан');
-
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio = null;
-      if (currentStation) {
-        currentStation.querySelector('.pauseBtn').style.display = 'none';
-        currentStation.querySelector('.playBtn').style.display = 'inline-block';
-      }
-    }
-
-    currentAudio = new Audio(url);
-    currentAudio.volume = 1;
-    currentAudio.play().catch(() => {
-      alert('Не удалось воспроизвести поток. Попробуйте позже.');
-    });
-
-    currentStation = stationDiv;
-    stationDiv.querySelector('.playBtn').style.display = 'none';
-    stationDiv.querySelector('.pauseBtn').style.display = 'inline-block';
-  }
-
-  function pauseStation(stationDiv) {
-    if (currentAudio && currentStation === stationDiv) {
-      currentAudio.pause();
-      currentAudio = null;
-      stationDiv.querySelector('.pauseBtn').style.display = 'none';
-      stationDiv.querySelector('.playBtn').style.display = 'inline-block';
-    }
-  }
-
-  playButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const station = btn.closest('.station');
-      playStation(station);
-    });
-  });
-  pauseButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const station = btn.closest('.station');
-      pauseStation(station);
-    });
-  });
-
-  // При уходе со станции — останавливаем радио
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) {
-        const stationDiv = entry.target;
-        if (stationDiv === currentStation && currentAudio) {
-          pauseStation(stationDiv);
+    playBtn.addEventListener('click', () => {
+      // Остановить предыдущее аудио, если есть
+      if(currentAudio){
+        currentAudio.pause();
+        currentAudio = null;
+        if(currentStation){
+          currentStation.querySelector('.playBtn').style.display = 'inline-block';
+          currentStation.querySelector('.pauseBtn').style.display = 'none';
         }
       }
+      // Запустить новое аудио
+      currentAudio = new Audio(streamUrl);
+      currentAudio.volume = 1.0;
+      currentAudio.play().catch(() => alert('Не удалось воспроизвести поток'));
+      currentStation = station;
+      playBtn.style.display = 'none';
+      pauseBtn.style.display = 'inline-block';
     });
-  }, {threshold: 0.7});
 
-  document.querySelectorAll('.station').forEach(station => {
-    observer.observe(station);
+    pauseBtn.addEventListener('click', () => {
+      if(currentAudio){
+        currentAudio.pause();
+        currentAudio = null;
+      }
+      pauseBtn.style.display = 'none';
+      playBtn.style.display = 'inline-block';
+    });
   });
 
-  // Скролл по одному элементу как в TikTok
-  const radioContainer = document.getElementById('radioContainer');
+  // Остановить аудио при листании, чтобы не перескакивало
+  let isScrolling;
+  radioContainer.addEventListener('scroll', () => {
+    window.clearTimeout(isScrolling);
+    isScrolling = setTimeout(() => {
+      if(currentAudio){
+        currentAudio.pause();
+        currentAudio = null;
+      }
+      stations.forEach(station => {
+        station.querySelector('.playBtn').style.display = 'inline-block';
+        station.querySelector('.pauseBtn').style.display = 'none';
+      });
+    }, 100);
+  });
 
+  // Жёсткий скролл по одному блоку (как в ТикТок)
   radioContainer.addEventListener('wheel', e => {
-    if (scrollLocked) {
-      e.preventDefault();
-      return;
-    }
-    scrollLocked = true;
-
-    const direction = e.deltaY > 0 ? 1 : -1;
-    const panelHeight = radioContainer.querySelector('.station').offsetHeight + 12;
-    const currentScroll = radioContainer.scrollTop;
-    let targetScroll = currentScroll + direction * panelHeight;
-
-    if (targetScroll < 0) targetScroll = 0;
-    const maxScroll = radioContainer.scrollHeight - radioContainer.clientHeight;
-    if (targetScroll > maxScroll) targetScroll = maxScroll;
-
-    radioContainer.scrollTo({
-      top: targetScroll,
-      behavior: 'smooth',
-    });
-
-    setTimeout(() => {
-      scrollLocked = false;
-    }, scrollLockTime);
-
     e.preventDefault();
+    const delta = Math.sign(e.deltaY);
+    const currentScroll = radioContainer.scrollTop;
+    const viewportHeight = window.innerHeight;
+    if(delta > 0){
+      // вниз
+      radioContainer.scrollTo({
+        top: Math.min(currentScroll + viewportHeight - 50, radioContainer.scrollHeight),
+        behavior: 'smooth'
+      });
+    } else if(delta < 0){
+      // вверх
+      radioContainer.scrollTo({
+        top: Math.max(currentScroll - viewportHeight + 50, 0),
+        behavior: 'smooth'
+      });
+    }
   }, { passive: false });
-
-  // Бургер меню
-  const burgerBtn = document.getElementById('burgerBtn');
-  const sidebar = document.getElementById('sidebar');
-  const sidebarClose = document.getElementById('sidebarClose');
-
-  burgerBtn.addEventListener('click', () => {
-    sidebar.classList.add('active');
-    sidebar.setAttribute('aria-hidden', 'false');
-  });
-  sidebarClose.addEventListener('click', () => {
-    sidebar.classList.remove('active');
-    sidebar.setAttribute('aria-hidden', 'true');
-  });
-
-  // Доступность кнопок Enter для меню
-  burgerBtn.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      burgerBtn.click();
-    }
-  });
-  sidebarClose.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      sidebarClose.click();
-    }
-  });
 </script>
 </body>
 </html>
