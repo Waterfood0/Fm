@@ -7,7 +7,6 @@
 <style>
   :root {
     --bg-dark: #0a0a0f;
-    --bg-light: #ffffff;
     --accent: #00ffe7;
     --font-main: 'Segoe UI', sans-serif;
   }
@@ -97,15 +96,15 @@
   /* Каждая станция — почти весь экран с небольшим отступом снизу */
   .station {
     scroll-snap-align: start;
-    height: 98vh;
-    max-height: 950px;
-    margin: 0 auto 10px;
+    height: 99vh;
+    max-height: 1000px;
+    margin: 0 auto 12px;
     padding: 2rem 1.5rem 5rem;
     background: rgba(0, 255, 231, 0.15);
     border: 2px solid #00ffe7cc;
     border-radius: 16px;
     backdrop-filter: blur(15px);
-    box-shadow: 0 0 30px #00ffe7bb;
+    box-shadow: 0 0 40px #00ffe7bb;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -156,8 +155,12 @@
     user-select: none;
     transition: background 0.25s ease;
   }
-  .btn:hover {
+  .btn:hover:not(:disabled) {
     background: #00ffe744;
+  }
+  .btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
   }
 
   /* Адаптив */
@@ -242,26 +245,26 @@
         </div>
       </div>
 
-      <div class="station" data-url="">
+      <div class="station" data-url="https://icecast.radio.net/radio/dfm_aac">
         <h2>DFM</h2>
         <div class="visualizer">
           <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
         </div>
         <div class="controls">
-          <button class="btn playBtn" disabled style="opacity:0.5; cursor: not-allowed;">▶️</button>
+          <button class="btn playBtn">▶️</button>
           <button class="btn pauseBtn" style="display:none;">⏸️</button>
           <button class="btn likeBtn">❤️ 40k</button>
           <button class="btn commentBtn">💬</button>
         </div>
       </div>
 
-      <div class="station" data-url="">
+      <div class="station" data-url="https://icecast.radio.net/radio/radio-dacha-aac">
         <h2>Радио Дача</h2>
         <div class="visualizer">
           <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
         </div>
         <div class="controls">
-          <button class="btn playBtn" disabled style="opacity:0.5; cursor: not-allowed;">▶️</button>
+          <button class="btn playBtn">▶️</button>
           <button class="btn pauseBtn" style="display:none;">⏸️</button>
           <button class="btn likeBtn">❤️ 10k</button>
           <button class="btn commentBtn">💬</button>
@@ -272,7 +275,7 @@
   </div>
 
 <script>
-  const playButtons = document.querySelectorAll('.playBtn:not([disabled])');
+  const playButtons = document.querySelectorAll('.playBtn');
   const pauseButtons = document.querySelectorAll('.pauseBtn');
   let currentAudio = null;
   let currentStation = null;
@@ -281,20 +284,24 @@
   let scrollLocked = false;
 
   function playStation(stationDiv) {
+    const url = stationDiv.dataset.url;
+    if (!url) return alert('Поток для этой станции не задан');
+
     if (currentAudio) {
       currentAudio.pause();
+      currentAudio = null;
       if (currentStation) {
         currentStation.querySelector('.pauseBtn').style.display = 'none';
         currentStation.querySelector('.playBtn').style.display = 'inline-block';
       }
     }
-    const url = stationDiv.dataset.url;
-    if (!url) return;
+
     currentAudio = new Audio(url);
     currentAudio.volume = 1;
     currentAudio.play().catch(() => {
       alert('Не удалось воспроизвести поток. Попробуйте позже.');
     });
+
     currentStation = stationDiv;
     stationDiv.querySelector('.playBtn').style.display = 'none';
     stationDiv.querySelector('.pauseBtn').style.display = 'inline-block';
@@ -303,6 +310,7 @@
   function pauseStation(stationDiv) {
     if (currentAudio && currentStation === stationDiv) {
       currentAudio.pause();
+      currentAudio = null;
       stationDiv.querySelector('.pauseBtn').style.display = 'none';
       stationDiv.querySelector('.playBtn').style.display = 'inline-block';
     }
@@ -321,14 +329,13 @@
     });
   });
 
+  // При уходе со станции — останавливаем радио
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (!entry.isIntersecting) {
         const stationDiv = entry.target;
         if (stationDiv === currentStation && currentAudio) {
-          currentAudio.pause();
-          stationDiv.querySelector('.pauseBtn').style.display = 'none';
-          stationDiv.querySelector('.playBtn').style.display = 'inline-block';
+          pauseStation(stationDiv);
         }
       }
     });
@@ -338,6 +345,7 @@
     observer.observe(station);
   });
 
+  // Скролл по одному элементу как в TikTok
   const radioContainer = document.getElementById('radioContainer');
 
   radioContainer.addEventListener('wheel', e => {
@@ -348,10 +356,8 @@
     scrollLocked = true;
 
     const direction = e.deltaY > 0 ? 1 : -1;
-
+    const panelHeight = radioContainer.querySelector('.station').offsetHeight + 12;
     const currentScroll = radioContainer.scrollTop;
-    const panelHeight = radioContainer.querySelector('.station').offsetHeight + 10;
-
     let targetScroll = currentScroll + direction * panelHeight;
 
     if (targetScroll < 0) targetScroll = 0;
@@ -370,6 +376,7 @@
     e.preventDefault();
   }, { passive: false });
 
+  // Бургер меню
   const burgerBtn = document.getElementById('burgerBtn');
   const sidebar = document.getElementById('sidebar');
   const sidebarClose = document.getElementById('sidebarClose');
@@ -381,6 +388,20 @@
   sidebarClose.addEventListener('click', () => {
     sidebar.classList.remove('active');
     sidebar.setAttribute('aria-hidden', 'true');
+  });
+
+  // Доступность кнопок Enter для меню
+  burgerBtn.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      burgerBtn.click();
+    }
+  });
+  sidebarClose.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      sidebarClose.click();
+    }
   });
 </script>
 </body>
