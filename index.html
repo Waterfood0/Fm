@@ -79,43 +79,23 @@
       font-size: 2.5rem;
       margin-bottom: 1.5rem;
       text-shadow: 0 0 8px #00ffe7aa;
+      user-select: text;
     }
-    .controls {
-      display: flex;
-      gap: 15px;
-      margin-top: auto;
-      user-select: none;
-    }
-    .btn {
-      padding: 0.7rem 1.2rem;
-      border: 2px solid var(--accent);
-      background: transparent;
-      color: var(--accent);
-      font-weight: bold;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.15s ease;
-      user-select: none;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 0 10px rgba(0,255,231,0.3);
-    }
-    .btn:hover {
-      background: rgba(0, 255, 231, 0.3);
-      transform: scale(1.1);
-    }
+
+    /* Визуализация аудио — по центру */
     .visualizer {
-      width: 100%;
-      height: 120px;
       position: absolute;
-      bottom: 100px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      max-width: 400px;
+      height: 120px;
       display: flex;
       justify-content: center;
       gap: 6px;
-      user-select: none;
       pointer-events: none;
+      user-select: none;
     }
     .bar {
       width: 8px;
@@ -132,7 +112,41 @@
       0%, 100% { height: 25px; }
       50% { height: 100px; }
     }
-    /* Scrollbar for desktop */
+
+    /* Кнопки управления — внизу */
+    .controls {
+      width: 100%;
+      max-width: 400px;
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      user-select: none;
+    }
+    .btn {
+      padding: 0.7rem 1.2rem;
+      border: 2px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.15s ease;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 0 10px rgba(0,255,231,0.3);
+    }
+    .btn:hover {
+      background: rgba(0, 255, 231, 0.3);
+      transform: scale(1.1);
+    }
+
+    /* Scrollbar для десктопа */
     .radio-container::-webkit-scrollbar {
       width: 12px;
     }
@@ -144,7 +158,8 @@
       border-radius: 10px;
       box-shadow: 0 0 10px var(--accent);
     }
-    /* Responsive font size */
+
+    /* Адаптив */
     @media (max-width: 768px) {
       .station h2 {
         font-size: 2rem;
@@ -152,6 +167,10 @@
       .btn {
         font-size: 1rem;
         padding: 0.6rem 1rem;
+      }
+      .visualizer {
+        max-width: 300px;
+        height: 100px;
       }
     }
     @media (max-width: 400px) {
@@ -161,6 +180,10 @@
       .btn {
         font-size: 0.9rem;
         padding: 0.5rem 0.8rem;
+      }
+      .visualizer {
+        max-width: 260px;
+        height: 90px;
       }
     }
   </style>
@@ -191,7 +214,6 @@
           <button class="btn commentBtn">💬 Комментарии</button>
         </div>
       </div>
-      <!-- Можно добавить больше станций по тому же шаблону -->
     </div>
   </div>
 
@@ -205,29 +227,24 @@
         const station = btn.closest('.station');
         const streamUrl = station.dataset.url;
 
-        // Если кликнули на уже играющую кнопку - ставим на паузу
         if(currentBtn === btn && currentAudio && !currentAudio.paused) {
           currentAudio.pause();
           btn.textContent = '▶️ Play';
           return;
         }
 
-        // Остановить предыдущее аудио, если есть
         if (currentAudio) {
           currentAudio.pause();
           if(currentBtn) currentBtn.textContent = '▶️ Play';
         }
 
-        // Создать и запустить новое аудио
         currentAudio = new Audio(streamUrl);
         currentAudio.volume = 1.0;
         currentAudio.play();
 
-        // Обновить кнопки
         btn.textContent = '⏸️ Pause';
         currentBtn = btn;
 
-        // Когда закончится аудио (если когда-нибудь)
         currentAudio.onended = () => {
           btn.textContent = '▶️ Play';
           currentAudio = null;
