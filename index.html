@@ -38,7 +38,7 @@
     user-select: none;
     z-index: 10;
   }
-  /* Бургер кнопка */
+
   #burgerBtn {
     position: absolute;
     right: 1rem;
@@ -58,7 +58,7 @@
     border-radius: 2px;
     transition: 0.3s;
   }
-  /* Сайдбар панель */
+
   #sidebar {
     position: fixed;
     top: 0; right: -300px;
@@ -83,7 +83,7 @@
     cursor: pointer;
     user-select: none;
   }
-  /* Контейнер с вертикальным пейджингом */
+
   .radio-container {
     flex: 1;
     scroll-snap-type: y mandatory;
@@ -93,7 +93,7 @@
     width: 100vw;
     overscroll-behavior: contain;
   }
-  /* Каждая станция — почти весь экран с небольшим отступом снизу */
+
   .station {
     scroll-snap-align: start;
     height: 99vh;
@@ -137,80 +137,55 @@
     0%, 100% { opacity: 0.3; }
     50% { opacity: 1; }
   }
+
   .controls {
     position: absolute;
     bottom: 25px;
     display: flex;
     gap: 26px;
   }
+
   .btn {
-    padding: 0.85rem 1.5rem;
+    padding: 0.85rem 1.2rem;
     border: 2px solid var(--accent);
     background: transparent;
     color: var(--accent);
     font-weight: 700;
     border-radius: 16px;
     cursor: pointer;
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     user-select: none;
-    transition: background 0.25s ease;
+    transition: 0.25s ease;
   }
+
   .btn:hover:not(:disabled) {
-    background: #00ffe744;
+    background: #00ffe733;
   }
+
   .btn:disabled {
     opacity: 0.3;
     cursor: not-allowed;
   }
 
-  /* Адаптив */
-  @media (max-width: 1200px) {
-    .station {
-      height: 90vh;
-      max-height: 800px;
-      padding-bottom: 4rem;
-      margin-bottom: 8px;
-    }
-    .station h2 {
-      font-size: 3rem;
-    }
-    .btn {
-      font-size: 1.2rem;
-      padding: 0.7rem 1.3rem;
-    }
+  .favBtn {
+    border: none;
+    font-size: 2rem;
+    background: none;
+    text-shadow: 0 0 6px var(--accent);
+    transition: all 0.3s ease;
   }
-  @media (max-width: 768px) {
-    .station {
-      height: 85vh;
-      max-height: 700px;
-      padding-bottom: 3.5rem;
-      margin-bottom: 7px;
-    }
-    .station h2 {
-      font-size: 2.5rem;
-    }
-    .btn {
-      font-size: 1.1rem;
-      padding: 0.6rem 1.1rem;
-    }
+
+  .favBtn.active {
+    color: #fff700;
+    text-shadow: 0 0 8px #fff700, 0 0 16px #ffea00, 0 0 30px #ffcc00;
+    transform: scale(1.2);
   }
+
   @media (max-width: 480px) {
-    .station {
-      height: 80vh;
-      max-height: 600px;
-      padding-bottom: 3rem;
-      margin-bottom: 6px;
-    }
-    .station h2 {
-      font-size: 2rem;
-    }
-    .btn {
-      font-size: 1rem;
-      padding: 0.5rem 1rem;
-    }
-    header {
-      font-size: 1.3rem;
-    }
+    .station h2 { font-size: 2.2rem; }
+    .btn { font-size: 1.2rem; }
+    .favBtn { font-size: 1.8rem; }
+    header { font-size: 1.3rem; }
   }
 </style>
 </head>
@@ -218,21 +193,18 @@
   <div class="app">
     <header>
       NeonRadio 🎧
-      <div id="burgerBtn" aria-label="Меню" title="Меню" role="button" tabindex="0">
-        <span></span>
-        <span></span>
-        <span></span>
+      <div id="burgerBtn" aria-label="Меню" role="button" tabindex="0">
+        <span></span><span></span><span></span>
       </div>
     </header>
 
     <div id="sidebar" aria-hidden="true">
-      <div id="sidebarClose" aria-label="Закрыть меню" title="Закрыть меню" role="button" tabindex="0">×</div>
+      <div id="sidebarClose" aria-label="Закрыть меню" role="button" tabindex="0">×</div>
       <h3 style="margin-bottom: 0.5rem;">Избранное</h3>
       <ul id="favoritesList" style="list-style: none; padding: 0; color: #fff;"></ul>
     </div>
 
     <div class="radio-container" id="radioContainer">
-
       <div class="station" data-url="https://icecast.eradioportal.com:8000/europaplus.aac">
         <h2>Europa Plus</h2>
         <div class="visualizer">
@@ -241,7 +213,7 @@
         <div class="controls">
           <button class="btn playBtn">▶️</button>
           <button class="btn pauseBtn" style="display:none;">⏸️</button>
-          <button class="btn favBtn">⭐ В избранное</button>
+          <button class="favBtn" title="Добавить в избранное">✩</button>
         </div>
       </div>
 
@@ -253,14 +225,13 @@
         <div class="controls">
           <button class="btn playBtn">▶️</button>
           <button class="btn pauseBtn" style="display:none;">⏸️</button>
-          <button class="btn favBtn">⭐ В избранное</button>
+          <button class="favBtn" title="Добавить в избранное">✩</button>
         </div>
       </div>
     </div>
   </div>
 
 <script>
-  // Управление бургер-меню
   const burgerBtn = document.getElementById('burgerBtn');
   const sidebar = document.getElementById('sidebar');
   const sidebarClose = document.getElementById('sidebarClose');
@@ -269,37 +240,38 @@
     sidebar.classList.toggle('active');
     sidebar.setAttribute('aria-hidden', !sidebar.classList.contains('active'));
   });
-
   sidebarClose.addEventListener('click', () => {
     sidebar.classList.remove('active');
     sidebar.setAttribute('aria-hidden', 'true');
   });
 
-  // Управление добавлением в избранное
   const favoriteStations = new Map();
+  const favoritesList = document.getElementById('favoritesList');
 
   document.querySelectorAll('.favBtn').forEach(btn => {
     btn.addEventListener('click', () => {
       const stationDiv = btn.closest('.station');
       const title = stationDiv.querySelector('h2').innerText;
-      const favoritesList = document.getElementById('favoritesList');
 
       if (favoriteStations.has(title)) {
         favoriteStations.delete(title);
-        btn.innerText = '⭐ В избранное';
+        btn.classList.remove('active');
+        btn.innerText = '✩';
         [...favoritesList.children].forEach(li => {
           if (li.innerText === title) li.remove();
         });
       } else {
         favoriteStations.set(title, stationDiv);
-        btn.innerText = '❌ Удалить из избранного';
+        btn.classList.add('active');
+        btn.innerText = '⭐';
 
         const listItem = document.createElement('li');
         listItem.innerText = title;
+        listItem.style.cursor = 'pointer';
+        listItem.style.padding = '4px 0';
         listItem.addEventListener('click', () => {
           stationDiv.scrollIntoView({ behavior: 'smooth' });
         });
-
         favoritesList.appendChild(listItem);
       }
     });
