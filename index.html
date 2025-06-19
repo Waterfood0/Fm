@@ -188,7 +188,7 @@
         <div class="controls">
           <button class="btn playBtn">▶️</button>
           <button class="btn pauseBtn" style="display:none;">⏸️</button>
-          <button class="btn favBtn">♥️ В избранное</button>
+          <button class="btn favBtn">🤍</button>
         </div>
       </div>
 
@@ -198,7 +198,7 @@
         <div class="controls">
           <button class="btn playBtn">▶️</button>
           <button class="btn pauseBtn" style="display:none;">⏸️</button>
-          <button class="btn favBtn">♥️ В избранное</button>
+          <button class="btn favBtn">🤍</button>
         </div>
       </div>
 
@@ -208,7 +208,7 @@
         <div class="controls">
           <button class="btn playBtn">▶️</button>
           <button class="btn pauseBtn" style="display:none;">⏸️</button>
-          <button class="btn favBtn">♥️ В избранное</button>
+          <button class="btn favBtn">🤍</button>
         </div>
       </div>
 
@@ -218,7 +218,7 @@
         <div class="controls">
           <button class="btn playBtn">▶️</button>
           <button class="btn pauseBtn" style="display:none;">⏸️</button>
-          <button class="btn favBtn">♥️ В избранное</button>
+          <button class="btn favBtn">🤍</button>
         </div>
       </div>
 
@@ -251,13 +251,13 @@
 
         if (favoriteStations.has(title)) {
           favoriteStations.delete(title);
-          btn.innerText = '♥️';
+          btn.innerText = '🤍';
           [...favoritesList.children].forEach(li => {
             if (li.innerText === title) li.remove();
           });
         } else {
           favoriteStations.set(title, stationDiv);
-          btn.innerText = '🤍';
+          btn.innerText = '♥️';
 
           const listItem = document.createElement('li');
           listItem.innerText = title;
